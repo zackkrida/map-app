@@ -15,4 +15,19 @@
   line-height: 1.15;
 }
 
+/* Blur the app when a modal is present */
+#__next[aria-hidden='true'] {
+  filter: blur(1.5px);
+}
+[data-reach-dialog-overlay] {
+  background: transparent;
+}
+
+[data-reach-dialog-content] {
+  @apply .max-w-4xl !important;
+  width: 100% !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+}
+
 @tailwind utilities;
