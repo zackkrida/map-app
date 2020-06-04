@@ -1,54 +1,80 @@
+import { useRouter } from 'next/router'
+
 export function Job() {
+  const router = useRouter()
+
   return (
-    <div className="bg-white shadow overflow-hidden shadow-md sm:rounded-lg w-full">
+    <div className="bg-white shadow overflow-hidden shadow-md sm:rounded-lg w-full relative">
+      <button
+        onClick={() => router.back()}
+        className="absolute left-4 top-4 bg-white bg-opacity-50 rounded-full text-white cursor-pointer focus:outline-none"
+      >
+        <svg
+          className="w-12 h-12 md:w-16 md:h-16 p-3"
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+      </button>
       <div>
         <img
           className="h-80 w-full object-cover"
-          src="https://images.unsplash.com/photo-1496128858413-b36217c2ce36?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1679&q=80"
+          src="/images/house-big.jpg"
           alt=""
         />
       </div>
 
       <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
         <h3 className="text-lg leading-6 font-medium text-gray-900">
-          Applicant Information
+          Job Information
         </h3>
         <p className="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
-          Personal details and application.
+          Details about the project.
         </p>
       </div>
       <div className="px-4 py-5 sm:p-0">
         <dl>
           <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 sm:py-5">
             <dt className="text-sm leading-5 font-medium text-gray-500">
-              Full name
+              Customer
             </dt>
-            <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
-              Margot Foster
+            <dd
+              id="jobTitle"
+              className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2"
+            >
+              Zack Krida
             </dd>
           </div>
           <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
             <dt className="text-sm leading-5 font-medium text-gray-500">
-              Application for
+              Address
             </dt>
             <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
-              Backend Developer
+              64 Shaw Drive, North Scituate, RI 02857
             </dd>
           </div>
           <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
             <dt className="text-sm leading-5 font-medium text-gray-500">
-              Email address
+              Services Included
             </dt>
             <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
-              margotfoster@example.com
-            </dd>
-          </div>
-          <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
-            <dt className="text-sm leading-5 font-medium text-gray-500">
-              Salary expectation
-            </dt>
-            <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
-              $120,000
+              <div className="flex text-sm capitalize text-white mt-2 justify-start">
+                <div className="mr-1 bg-brand-navy px-2 rounded-md">
+                  roofing
+                </div>
+                <div className="mr-1 bg-brand-green px-2 rounded-md">
+                  siding
+                </div>
+                <div className="mr-1 bg-brand-blue px-2 rounded-md">
+                  windows
+                </div>
+                <div className="bg-brand-orange px-2 rounded-md">doors</div>
+              </div>
             </dd>
           </div>
           <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
