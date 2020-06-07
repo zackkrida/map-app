@@ -3,11 +3,19 @@ import Link from 'next/link'
 import { Logo } from '../components/Logo'
 import useSWR from 'swr'
 import { Marker } from './Marker'
+import { scrollTo } from 'lib/utils'
+import { useState, useEffect } from 'react'
 
 const fetcher = url => fetch(url).then(res => res.json())
 
 export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
   const { data: jobs } = useSWR('/api/jobs', fetcher)
+
+  const [activeItem, setActiveItem] = useState(null)
+  useEffect(() => {
+    if (!activeItem) return
+    scrollTo(`[data-index="${activeItem}"]`)
+  }, [activeItem])
 
   if (!jobs) {
     return <div>Loading...</div>
@@ -28,8 +36,7 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
         <div className="md:absolute w-full w-full h-64 md:h-screen">
           <GoogleMap
             defaultCenter={mapPos}
-            defaultZoom={11}
-            margin={[0, 0, 0, 400]}
+            defaultZoom={10}
             options={{
               fullscreenControl: false,
               zoomControlOptions: {
@@ -45,6 +52,8 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
                 i =>
                   i.i360__Appointment_Latitude__c !== null && (
                     <Marker
+                      active={i.Id === activeItem}
+                      onClick={() => setActiveItem(i.Id)}
                       key={i.Id}
                       lat={i.i360__Appointment_Latitude__c}
                       lng={i.i360__Appointment_Longitude__c}
@@ -110,7 +119,12 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
           <div className="block md:overflow-y-scroll flex-grow">
             <ul>
               {jobs.map(job => (
-                <Job job={job} key={job.Id} />
+                <Job
+                  onClick={() => setActiveItem(job.Id)}
+                  job={job}
+                  key={job.Id}
+                  currentId={activeItem}
+                />
               ))}
             </ul>
           </div>
@@ -132,6 +146,7 @@ interface LocationCoordinates {
 }
 
 interface JobProps {
+  Id: string
   i360__Correspondence_Name__c: string
   i360__Appointment_Address__c: string
   i360__Appointment_City__c: string
@@ -147,10 +162,28 @@ const ProductColors = {
   Doors: 'bg-brand-orange',
 }
 
-function Job({ job }: { job: JobProps }) {
+function Job({
+  job,
+  currentId,
+  onClick,
+}: {
+  job: JobProps
+  currentId: string
+  onClick: () => void
+}) {
   return (
     <Link href="/job/[slug]" as="/job/one">
-      <a className="block hover:bg-gray-50 focus:outline-none focus:bg-gray-50 transition duration-150 ease-in-out border-b border-gray-50">
+      <a
+        onClick={onClick}
+        data-index={job.Id}
+        className={`block hover:bg-gray-50 focus:outline-none focus:bg-gray-50 transition duration-150 ease-in-out border-b border-gray-50 w-full
+          ${
+            currentId === job.Id
+              ? ' bg-blue-100 border border-blue-500 shadow-md'
+              : ''
+          }
+        `}
+      >
         <div className="flex items-center px-4 py-4">
           <div className="min-w-0 flex-1 flex items-center">
             <div className="flex-shrink-0">
@@ -204,9 +237,12 @@ function Job({ job }: { job: JobProps }) {
                   </div>
                 </div>
               </div>
-              <div className="flex text-sm capitalize text-white mt-2 justify-start">
+              <div className="flex text-xs capitalize text-white mt-2 justify-start">
                 {job.i360__Job_Type__c.split(';').map(i => (
-                  <div className={`mr-1 ${ProductColors[i]} px-2 rounded-md`}>
+                  <div
+                    key={`${job.Id}-${i}`}
+                    className={`mr-1 ${ProductColors[i]} px-2 rounded-md`}
+                  >
                     {i}
                   </div>
                 ))}
@@ -220,9 +256,9 @@ function Job({ job }: { job: JobProps }) {
               viewBox="0 0 20 20"
             >
               <path
-                fill-rule="evenodd"
+                fillRule="evenodd"
                 d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                clip-rule="evenodd"
+                clipRule="evenodd"
               />
             </svg>
           </div>

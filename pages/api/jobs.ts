@@ -9,7 +9,7 @@ export default async function Salesforce(_, res) {
     const projects = await t60
       .sobject('i360__Project__c')
       .select(['*'])
-      .limit(500)
+      .limit(200)
 
     res.json(projects)
   } catch (error) {
