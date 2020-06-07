@@ -1,8 +1,18 @@
 import GoogleMap from 'google-map-react'
 import Link from 'next/link'
 import { Logo } from '../components/Logo'
+import useSWR from 'swr'
+import { Marker } from './Marker'
+
+const fetcher = url => fetch(url).then(res => res.json())
 
 export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
+  const { data: jobs } = useSWR('/api/jobs', fetcher)
+
+  if (!jobs) {
+    return <div>Loading...</div>
+  }
+
   return (
     <div>
       {children && children}
@@ -19,10 +29,28 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
           <GoogleMap
             defaultCenter={mapPos}
             defaultZoom={11}
+            margin={[0, 0, 0, 400]}
+            options={{
+              fullscreenControl: false,
+              zoomControlOptions: {
+                position: 6,
+              },
+            }}
             bootstrapURLKeys={{
               key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
             }}
           >
+            {jobs &&
+              jobs.map(
+                i =>
+                  i.i360__Appointment_Latitude__c !== null && (
+                    <Marker
+                      key={i.Id}
+                      lat={i.i360__Appointment_Latitude__c}
+                      lng={i.i360__Appointment_Longitude__c}
+                    />
+                  )
+              )}
             {mapChildren}
           </GoogleMap>
         </div>
@@ -52,7 +80,7 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
 
             <div className="pt-4 pb-2 flex justify-between items-center">
               <p className="text">
-                Showing <strong>40</strong> Jobs
+                Showing <strong>{jobs.length}</strong> Jobs
               </p>
               <p>
                 <button className="bg-white bg-opacity-25 px-2 py-1 rounded-md inline-flex border-white border-2 border-opacity-0 items-center text-sm focus:outline-none focus:border-opacity-100 focus:shadow-md focus:bg-opacity-100 focus:text-brand-blue focus:outline-none hover:border-opacity-100 hover:shadow-md hover:bg-opacity-100 hover:text-brand-blue transition-bg duration-100 ease-in-out">
@@ -73,13 +101,17 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
             </div>
           </div>
 
+          {/* <div className="absolute top-0 left-0 max-h-screen overflow-scroll bg-white text-sm max-w-2xl">
+            <pre>
+              <code>{JSON.stringify(jobs, null, 2)}</code>
+            </pre>
+          </div> */}
+
           <div className="block md:overflow-y-scroll flex-grow">
             <ul>
-              {Array(40)
-                .fill('')
-                .map((_, i) => (
-                  <Job key={i} />
-                ))}
+              {jobs.map(job => (
+                <Job job={job} key={job.Id} />
+              ))}
             </ul>
           </div>
         </div>
@@ -99,7 +131,23 @@ interface LocationCoordinates {
   lng: number
 }
 
-function Job() {
+interface JobProps {
+  i360__Correspondence_Name__c: string
+  i360__Appointment_Address__c: string
+  i360__Appointment_City__c: string
+  i360__Appointment_State__c: string
+  i360__Appointment_Zip__c: string
+  i360__Job_Type__c: string
+}
+
+const ProductColors = {
+  Roofing: 'bg-brand-green',
+  Siding: 'bg-brand-green',
+  Windows: 'bg-brand-blue',
+  Doors: 'bg-brand-orange',
+}
+
+function Job({ job }: { job: JobProps }) {
   return (
     <Link href="/job/[slug]" as="/job/one">
       <a className="block hover:bg-gray-50 focus:outline-none focus:bg-gray-50 transition duration-150 ease-in-out border-b border-gray-50">
@@ -115,36 +163,53 @@ function Job() {
             <div className="min-w-0 flex-1 px-4">
               <div>
                 <div className="text-sm leading-5 font-medium text-indigo-600 truncate">
-                  Zack Krida
+                  {job.i360__Correspondence_Name__c}
                 </div>
-                <div className="mt-2 flex items-center text-sm leading-5 text-gray-500">
-                  <svg
-                    className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                  </svg>
-                  <span className="truncate">
-                    64 Shaw Drive, North Scituate, RI 02857
-                  </span>
+                <div className="flex flex-col">
+                  <div className="mt-2 flex items-center text-sm leading-5 text-gray-500">
+                    <svg
+                      className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    <span className="truncate">
+                      {job.i360__Appointment_Address__c},{' '}
+                      {job.i360__Appointment_City__c},{' '}
+                      {job.i360__Appointment_State__c}{' '}
+                      {job.i360__Appointment_Zip__c}
+                      64 Shaw Drive, North Scituate, RI 02857
+                    </span>
+                  </div>
+                  <div className="mt-2 flex items-center text-sm leading-5 text-gray-500">
+                    <svg
+                      className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    <span className="truncate">
+                      64 Shaw Drive, North Scituate, RI 02857
+                    </span>
+                  </div>
                 </div>
               </div>
               <div className="flex text-sm capitalize text-white mt-2 justify-start">
-                <div className="mr-1 bg-brand-navy px-2 rounded-md">
-                  roofing
-                </div>
-                <div className="mr-1 bg-brand-green px-2 rounded-md">
-                  siding
-                </div>
-                <div className="mr-1 bg-brand-blue px-2 rounded-md">
-                  windows
-                </div>
-                <div className="bg-brand-orange px-2 rounded-md">doors</div>
+                {job.i360__Job_Type__c.split(';').map(i => (
+                  <div className={`mr-1 ${ProductColors[i]} px-2 rounded-md`}>
+                    {i}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
