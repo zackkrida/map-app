@@ -3,7 +3,7 @@ export function Marker({ active = false, lat, lng, ...props }) {
     <div
       {...props}
       className={`Marker text-blue-400 hover:text-blue-500 block w-8 h-8 hover:scale-125 duration-75 ease-in-out transform cursor-pointer ${
-        active ? 'text-blue-500' : ''
+        active ? 'text-blue-500 scale-110' : ''
       }`}
       lat={lat}
       lng={lng}
