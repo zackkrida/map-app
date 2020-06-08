@@ -1,4 +1,4 @@
-import GoogleMap from 'google-map-react'
+import GoogleMap, { Maps } from 'google-map-react'
 import { scrollTo, getMapBoundsFromProjects } from 'lib/utils'
 import Link from 'next/link'
 import { useEffect, useState, useRef } from 'react'
@@ -29,9 +29,11 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
   // Re-fit map whenever we get new projects
   useEffect(() => {
     if (projects.length === 0) return
-    mapRef.current.fitBounds(
+    ;(mapRef.current as any).fitBounds(
       getMapBoundsFromProjects(mapsRef.current, projects),
-      { right: window.innerWidth > 700 ? 400 : 0 }
+      {
+        right: window.innerWidth > 700 ? 400 : 0,
+      }
     )
   }, [projects])
 
