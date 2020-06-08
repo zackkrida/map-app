@@ -24,4 +24,20 @@ body {
   @apply .cursor-not-allowed;
 }
 
+.Marker {
+  clip-path: polygon(
+    12.13% 58.75%,
+    13.88% 25.5%,
+    33% 9.62%,
+    65.25% 7.87%,
+    81.75% 20.62%,
+    88.5% 36.12%,
+    86.88% 59.75%,
+    49.5% 98.13%
+  );
+}
+.Marker:hover {
+  z-index: 3;
+}
+
 @tailwind utilities;
