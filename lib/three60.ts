@@ -1,8 +1,8 @@
-// Connect to ImproveIt360 (whitelabeled Salesforce for Home Remodelers)
 import jsforce from 'jsforce'
 
 /**
  * Connect to Salesforce Bulk API (aka ImproveIt360).
+ * @docs API Reference: https://improveit360-3562.cloudforce.com/01I1I000001rrvm?setupid=CustomObjects
  */
 export async function connectTo360() {
   const sf = new jsforce.Connection({ loginUrl: config.url })

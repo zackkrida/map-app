@@ -4,8 +4,8 @@ import { Layout } from 'components/Layout'
 
 function MyApp({ Component, pageProps }) {
   const mapPos = {
-    lat: 41.65391,
-    lng: -71.2433,
+    lat: 41.67391,
+    lng: -70.9033,
   }
 
   return (

@@ -1,7 +1,12 @@
+import Skeleton from 'react-loading-skeleton'
 import { useRouter } from 'next/router'
+import { getBrandColor, prettyDate } from 'lib/utils'
 
-export function Job() {
+export function Project({ project }) {
   const router = useRouter()
+  const loading = typeof project === 'undefined'
+
+  const show = value => (loading ? <Skeleton /> : value)
 
   return (
     <div className="bg-white shadow overflow-hidden shadow-md sm:rounded-lg w-full relative">
@@ -18,7 +23,7 @@ export function Job() {
           viewBox="0 0 24 24"
           stroke="currentColor"
         >
-          <path d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          <path d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
       </button>
       <div>
@@ -47,7 +52,7 @@ export function Job() {
               id="jobTitle"
               className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2"
             >
-              Zack Krida
+              {show(project?.i360__Correspondence_Name__c)}
             </dd>
           </div>
           <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
@@ -55,7 +60,14 @@ export function Job() {
               Address
             </dt>
             <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
-              64 Shaw Drive, North Scituate, RI 02857
+              {show(
+                <>
+                  {project?.i360__Appointment_Address__c},{' '}
+                  {project?.i360__Appointment_City__c},{' '}
+                  {project?.i360__Appointment_State__c}{' '}
+                  {project?.i360__Appointment_Zip__c}
+                </>
+              )}
             </dd>
           </div>
           <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
@@ -63,34 +75,44 @@ export function Job() {
               Services Included
             </dt>
             <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
-              <div className="flex text-sm capitalize text-white mt-2 justify-start">
-                <div className="mr-1 bg-brand-navy px-2 rounded-md">
-                  roofing
+              {show(
+                <div className="flex capitalize text-white mt-2 justify-start">
+                  {project?.i360__Job_Type__c.split(';').map(i => (
+                    <div
+                      key={`${project.Id}-${i}`}
+                      className={`mr-2 ${getBrandColor(
+                        i
+                      )} px-4 py-2 rounded-md`}
+                    >
+                      {i}
+                    </div>
+                  ))}
                 </div>
-                <div className="mr-1 bg-brand-green px-2 rounded-md">
-                  siding
-                </div>
-                <div className="mr-1 bg-brand-blue px-2 rounded-md">
-                  windows
-                </div>
-                <div className="bg-brand-orange px-2 rounded-md">doors</div>
-              </div>
+              )}
             </dd>
           </div>
           <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
             <dt className="text-sm leading-5 font-medium text-gray-500">
-              About
+              Date Completed
             </dt>
             <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
-              Fugiat ipsum ipsum deserunt culpa aute sint do nostrud anim
-              incididunt cillum culpa consequat. Excepteur qui ipsum aliquip
-              consequat sint. Sit id mollit nulla mollit nostrud in ea officia
-              proident. Irure nostrud pariatur mollit ad adipisicing
-              reprehenderit deserunt qui eu.
+              {show(
+                project?.i360__Completed_On__c
+                  ? prettyDate(project.i360__Completed_On__c)
+                  : 'In Progress'
+              )}
             </dd>
           </div>
           <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
             <dt className="text-sm leading-5 font-medium text-gray-500">
+              Sales Rep
+            </dt>
+            <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
+              {show(project?.i360__Sale_Rep__c)}
+            </dd>
+          </div>
+          <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
+            {/* <dt className="text-sm leading-5 font-medium text-gray-500">
               Attachments
             </dt>
             <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
@@ -103,9 +125,9 @@ export function Job() {
                       viewBox="0 0 20 20"
                     >
                       <path
-                        fill-rule="evenodd"
+                        fillRule="evenodd"
                         d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z"
-                        clip-rule="evenodd"
+                        clipRule="evenodd"
                       />
                     </svg>
                     <span className="ml-2 flex-1 w-0 truncate">
@@ -129,9 +151,9 @@ export function Job() {
                       viewBox="0 0 20 20"
                     >
                       <path
-                        fill-rule="evenodd"
+                        fillRule="evenodd"
                         d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z"
-                        clip-rule="evenodd"
+                        clipRule="evenodd"
                       />
                     </svg>
                     <span className="ml-2 flex-1 w-0 truncate">
@@ -148,7 +170,7 @@ export function Job() {
                   </div>
                 </li>
               </ul>
-            </dd>
+            </dd> */}
           </div>
         </dl>
       </div>
