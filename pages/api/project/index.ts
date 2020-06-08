@@ -12,9 +12,7 @@ export default async function Jobs(req, res) {
         i360__Appointment_Zip__c: { $eq: searchTerm },
       })
 
-    console.info(projects.length)
-
-    res.json(projects.slice(0, 200))
+    res.json(projects)
   } catch (error) {
     console.error(error)
     res.json({ error: true, message: error.message })

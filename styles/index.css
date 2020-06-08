@@ -20,4 +20,8 @@ body {
   padding: 0 !important;
 }
 
+:disabled {
+  @apply .cursor-not-allowed;
+}
+
 @tailwind utilities;

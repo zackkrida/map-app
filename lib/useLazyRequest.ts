@@ -8,8 +8,8 @@ export const useLazyRequest = (query: string, data) => {
     revalidateOnMount: false,
   })
 
-  const executeQuery = async () => {
-    const result = await postFetcher(query, data)
+  const executeQuery = async extraData => {
+    const result = await postFetcher(query, { ...data, ...extraData })
     response.mutate(result, false)
   }
 

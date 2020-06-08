@@ -6,6 +6,7 @@ import { Logo } from '../components/Logo'
 import { ProjectListItem } from '../components/ProjectListItem'
 import { Marker } from './Marker'
 import { useLazyRequest } from 'lib/useLazyRequest'
+import { useRouter } from 'next/router'
 
 enum SearchTypes {
   Name = 'name',
@@ -17,6 +18,8 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
   const mapRef = useRef()
   const mapsRef = useRef()
 
+  const router = useRouter()
+
   const [searchTerm, setSearchTerm] = useState('')
   const [searchType, setSearchType] = useState<SearchTypes>(SearchTypes.Zip)
 
@@ -24,11 +27,10 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
     searchTerm,
     searchType,
   })
-  console.log(projects)
 
   // Re-fit map whenever we get new projects
   useEffect(() => {
-    if (projects.length === 0) return
+    if (projects.length === 0 || !mapRef.current) return
     ;(mapRef.current as any).fitBounds(
       getMapBoundsFromProjects(mapsRef.current, projects),
       {
@@ -36,6 +38,15 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
       }
     )
   }, [projects])
+
+  // Submit search whenver the page's url updates and contains a search param
+  useEffect(() => {
+    console.log('it changed!')
+    if ('searchTerm' in router.query) {
+      setSearchTerm(router.query.searchTerm as string)
+      fetchMore({ searchTerm: router.query.searchTerm })
+    }
+  }, [router.query])
 
   const [activeItem, setActiveItem] = useState(null)
   useEffect(() => {
@@ -45,7 +56,10 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
 
   function handleSubmit(event) {
     event.preventDefault()
-    fetchMore()
+    router.push({
+      pathname: router.pathname,
+      query: { ...router.query, searchTerm, searchType },
+    })
   }
 
   if (!projects) {
@@ -107,10 +121,11 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
               <input
                 value={searchTerm}
                 onChange={event => setSearchTerm(event.target.value)}
-                className="form-input flex-1 block w-full rounded-none rounded-l-md transition duration-150 ease-in-out sm:text-sm sm:leading-5 placeholder-cool-gray-500 text-brand-blue"
+                className="form-input flex-1 block w-full rounded-none rounded-l-md transition duration-150 ease-in-out sm:text-sm sm:leading-5 placeholder-cool-gray-500 text-brand-navy"
                 placeholder={`Search projects by ${searchType}`}
               />
               <button
+                disabled={searchTerm.length === 0}
                 type="submit"
                 className="appearance-none inline-flex items-center px-3 rounded-r-md border border-l-0 border-blue-500 bg-brand-blue text-white text-sm active:bg-blue-500"
               >
