@@ -22,6 +22,7 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
 
   const [searchTerm, setSearchTerm] = useState('')
   const [searchType, setSearchType] = useState<SearchTypes>(SearchTypes.Zip)
+  const [resultsLoading, setResultsLoading] = useState(false)
 
   const { data: projects, fetchMore } = useLazyRequest(`/api/project`, {
     searchTerm,
@@ -44,7 +45,10 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
     console.log('it changed!')
     if ('searchTerm' in router.query) {
       setSearchTerm(router.query.searchTerm as string)
-      fetchMore({ searchTerm: router.query.searchTerm })
+      setResultsLoading(true)
+      fetchMore({ searchTerm: router.query.searchTerm }).then(_ =>
+        setResultsLoading(false)
+      )
     }
   }, [router.query])
 
@@ -125,21 +129,47 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
                 placeholder={`Search projects by ${searchType}`}
               />
               <button
-                disabled={searchTerm.length === 0}
+                disabled={searchTerm.length === 0 || resultsLoading}
                 type="submit"
                 className="appearance-none inline-flex items-center px-3 rounded-r-md border border-l-0 border-blue-500 bg-brand-blue text-white text-sm active:bg-blue-500"
               >
-                <svg
-                  fill="currentColor"
-                  className="w-6 h-6"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                    clipRule="evenodd"
-                  ></path>
-                </svg>
+                {!resultsLoading ? (
+                  <svg
+                    fill="currentColor"
+                    className="w-6 h-6"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                      clipRule="evenodd"
+                    ></path>
+                  </svg>
+                ) : (
+                  <svg
+                    className="w-6 h-6"
+                    viewBox="0 0 100 100"
+                    preserveAspectRatio="xMidYMid"
+                  >
+                    <g>
+                      <path
+                        d="M50 15A35 35 0 1 0 74.74873734152916 25.25126265847084"
+                        fill="none"
+                        stroke="#ffffff"
+                        stroke-width="12"
+                      ></path>
+                      <path d="M49 3L49 27L61 15L49 3" fill="#ffffff"></path>
+                      <animateTransform
+                        attributeName="transform"
+                        type="rotate"
+                        repeatCount="indefinite"
+                        dur="1s"
+                        values="0 50 50;360 50 50"
+                        keyTimes="0;1"
+                      ></animateTransform>
+                    </g>
+                  </svg>
+                )}
               </button>
             </form>
 
