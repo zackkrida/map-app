@@ -76,47 +76,49 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
       {children && children}
 
       {/* Map */}
-      <div className="w-full h-screen flex flex-col md:flex-row items-stretch relativee">
+      <div className="w-full h-screen flex flex-col md:flex-row items-stretch relative">
         <Link href="/">
           <a className="absolute left-0 right-0 w-40 mx-auto px-2 pt-1 pb-2 md:left-4 md:right-auto top-0 z-20 md:w-48 bg-white md:pb-2 md:px-4 md:pt-2 rounded-b-md shadow-md">
             <Logo />
           </a>
         </Link>
 
-        <div className="md:absolute w-full flex-grow md:h-screen">
-          <GoogleMap
-            defaultCenter={mapPos}
-            defaultZoom={9.5}
-            options={{
-              fullscreenControl: false,
-              zoomControlOptions: {
-                position: 6,
-              },
-            }}
-            bootstrapURLKeys={{
-              key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
-            }}
-            yesIWantToUseGoogleMapApiInternals
-            onGoogleApiLoaded={({ map, maps }) => {
-              mapRef.current = map
-              mapsRef.current = maps
-            }}
-          >
-            {projects &&
-              projects.map(
-                i =>
-                  i.i360__Appointment_Latitude__c !== null && (
-                    <Marker
-                      active={i.Id === activeItem}
-                      onClick={() => setActiveItem(i.Id)}
-                      key={i.Id}
-                      lat={i.i360__Appointment_Latitude__c}
-                      lng={i.i360__Appointment_Longitude__c}
-                    />
-                  )
-              )}
-            {mapChildren}
-          </GoogleMap>
+        <div className="relative md:absolute w-full flex-grow md:h-screen">
+          <div className="absolute h-full min-h-full w-full">
+            <GoogleMap
+              defaultCenter={mapPos}
+              defaultZoom={9.5}
+              options={{
+                fullscreenControl: false,
+                zoomControlOptions: {
+                  position: 6,
+                },
+              }}
+              bootstrapURLKeys={{
+                key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
+              }}
+              yesIWantToUseGoogleMapApiInternals
+              onGoogleApiLoaded={({ map, maps }) => {
+                mapRef.current = map
+                mapsRef.current = maps
+              }}
+            >
+              {projects &&
+                projects.map(
+                  i =>
+                    i.i360__Appointment_Latitude__c !== null && (
+                      <Marker
+                        active={i.Id === activeItem}
+                        onClick={() => setActiveItem(i.Id)}
+                        key={i.Id}
+                        lat={i.i360__Appointment_Latitude__c}
+                        lng={i.i360__Appointment_Longitude__c}
+                      />
+                    )
+                )}
+              {mapChildren}
+            </GoogleMap>
+          </div>
         </div>
 
         {/* Results Sidebar */}
