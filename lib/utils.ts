@@ -1,6 +1,11 @@
 export const scrollTo = (selector: string) => {
   const $el = document.querySelector(selector)
-  if ($el) $el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  if ($el)
+    $el.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+      inline: 'center',
+    })
 }
 
 export const fetcher = url => fetch(url).then(res => res.json())

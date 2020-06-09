@@ -75,14 +75,14 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
       {children && children}
 
       {/* Map */}
-      <div className="w-full md:h-screen flex flex-col md:flex-row items-stretch relative">
+      <div className="w-full h-screen flex flex-col md:flex-row items-stretch relativee">
         <Link href="/">
           <a className="absolute left-4 top-0 z-20 w-48 bg-white pb-2 px-4 pt-2 rounded-b-md shadow-md">
             <Logo />
           </a>
         </Link>
 
-        <div className="md:absolute w-full w-full h-64 md:h-screen">
+        <div className="md:absolute w-full flex-grow md:h-screen">
           <GoogleMap
             defaultCenter={mapPos}
             defaultZoom={9.5}
@@ -202,8 +202,8 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
             </pre>
           </div> */}
 
-          <div className="block md:overflow-y-scroll flex-grow">
-            <ul>
+          <div className="md:overflow-y-scroll md:flex-grow block">
+            <ul className="flex md:block overflow-x-scroll md:overflow-auto">
               {projects.map(project => (
                 <ProjectListItem
                   onClick={() => setActiveItem(project.Id)}
