@@ -15,15 +15,15 @@ export function ProjectListItem({
       <a
         onClick={onClick}
         data-index={project.Id}
-        className={`block hover:bg-blue-50 focus:outline-none focus:bg-blue-50 transition duration-150 ease-in-out border-b border-gray-50 w-full
+        className={`block hover:bg-blue-50 focus:outline-none focus:bg-blue-50 transition duration-150 ease-in-out border-r border-gray-100  md:border-b md:border-gray-50 w-80 md:w-full
           ${
             currentId === project.Id
-              ? ' bg-blue-100 border border-blue-500 shadow-md hover:bg-blue-200 rounded-md'
+              ? ' bg-blue-100 md:border md:border-blue-500 shadow-md hover:bg-blue-200 md:rounded-md'
               : ''
           }
         `}
       >
-        <div className="flex items-center px-4 py-4">
+        <div className="flex items-center  px-2 md:px-4 py-4">
           <div className="min-w-0 flex-1 flex items-center">
             <div className="flex-shrink-0">
               <img
@@ -32,7 +32,7 @@ export function ProjectListItem({
                 alt=""
               />
             </div>
-            <div className="min-w-0 flex-1 px-4">
+            <div className="min-w-0 flex-1 pl-2 md:px-4">
               <div>
                 <div className="text-sm leading-5 font-medium text-blue-600 truncate">
                   {project.i360__Correspondence_Name__c}
@@ -95,7 +95,7 @@ export function ProjectListItem({
               </div>
             </div>
           </div>
-          <div>
+          <div className="hidden md:block">
             <svg
               className="h-5 w-5 text-gray-400"
               fill="currentColor"

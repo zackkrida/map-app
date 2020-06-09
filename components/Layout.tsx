@@ -77,7 +77,7 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
       {/* Map */}
       <div className="w-full h-screen flex flex-col md:flex-row items-stretch relativee">
         <Link href="/">
-          <a className="absolute left-4 top-0 z-20 w-48 bg-white pb-2 px-4 pt-2 rounded-b-md shadow-md">
+          <a className="absolute left-0 right-0 w-40 mx-auto px-2 pt-1 pb-2 md:left-4 md:right-auto top-0 z-20 md:w-48 bg-white md:pb-2 md:px-4 md:pt-2 rounded-b-md shadow-md">
             <Logo />
           </a>
         </Link>

@@ -25,6 +25,7 @@ body {
 }
 
 .Marker {
+  position: relative;
   clip-path: polygon(
     12.13% 58.75%,
     13.88% 25.5%,
@@ -36,6 +37,7 @@ body {
     49.5% 98.13%
   );
 }
+
 .Marker:hover {
   z-index: 3;
 }
