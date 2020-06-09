@@ -120,7 +120,7 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
         </div>
 
         {/* Results Sidebar */}
-        <div className="w-full md:max-w-md md:flex md:flex-col md:max-h-screen shadow-md z-20 md:m-4 md:rounded-md md:ml-auto overflow-hidden bg-white">
+        <div className="w-full md:max-w-md flex flex-col-reverse md:flex-col md:max-h-screen shadow-md z-20 md:m-4 md:rounded-md md:ml-auto overflow-hidden bg-white">
           <div className="pt-4 px-2 bg-brand-navy text-white shadow-md">
             <form className="" onSubmit={handleSubmit}>
               <div className="flex md:rounded-md shadow-sm relative rounded-none rounded-l-md transition duration-150 ease-in-out sm:text-sm sm:leading-5  text-brand-navy">
