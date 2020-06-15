@@ -26,7 +26,7 @@ export default async function Jobs(req, res) {
     if (status === 'in-progress') {
       filters.i360__Completed_On__c = { $eq: null }
     } else {
-      // filters.i360__Completed_On__c = { $eq }
+      filters.i360__Completed_On__c = { $ne: null }
     }
   }
 
