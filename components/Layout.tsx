@@ -7,6 +7,7 @@ import { ProjectListItem } from '../components/ProjectListItem'
 import { Marker } from './Marker'
 import { useLazyRequest } from 'lib/useLazyRequest'
 import { useRouter } from 'next/router'
+import { Select } from './Select'
 
 enum SearchTypes {
   Name = 'name',
@@ -20,14 +21,35 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
 
   const router = useRouter()
 
+  const [searchCount, setSearchCount] = useState(0)
   const [searchTerm, setSearchTerm] = useState('')
   const [searchType, setSearchType] = useState<SearchTypes>(SearchTypes.Zip)
   const [resultsLoading, setResultsLoading] = useState(false)
+
+  const today = new Date()
+  const years = Array(30)
+    .fill('')
+    .map((_, i) => ({
+      name: `${today.getFullYear() - i}`,
+      value: `${today.getFullYear() - i}`,
+    }))
+
+  const [showFilters, setShowFilters] = useState(false)
+  const [filters, setFilters] = useState({
+    year: '',
+  })
 
   const { data: projects, fetchMore } = useLazyRequest(`/api/project`, {
     searchTerm,
     searchType,
   })
+
+  // Show filters if haven't searched yet
+  useEffect(() => {
+    if (searchCount === 0) {
+      setShowFilters(true)
+    }
+  }, [searchCount])
 
   // Re-fit map whenever we get new projects
   useEffect(() => {
@@ -42,7 +64,6 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
 
   // Submit search whenver the page's url updates and contains a search param
   useEffect(() => {
-    console.log('it changed!')
     if ('searchTerm' in router.query) {
       setSearchTerm(router.query.searchTerm as string)
       setResultsLoading(true)
@@ -123,9 +144,9 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
 
         {/* Results Sidebar */}
         <div className="w-full md:max-w-md flex flex-col-reverse md:flex-col md:max-h-screen shadow-md z-20 md:m-4 md:rounded-md md:ml-auto overflow-hidden bg-white">
-          <div className="pt-4 px-2 bg-brand-navy text-white shadow-md">
-            <form className="" onSubmit={handleSubmit}>
-              <div className="flex md:rounded-md shadow-sm relative rounded-none rounded-l-md transition duration-150 ease-in-out sm:text-sm sm:leading-5  text-brand-navy">
+          <div className="pt-4 bg-brand-navy text-white shadow-md">
+            <form className="relative" onSubmit={handleSubmit}>
+              <div className="mx-2 flex md:rounded-md shadow-sm relative rounded-none rounded-l-md transition duration-150 ease-in-out sm:text-sm sm:leading-5  text-brand-navy">
                 <input
                   value={searchTerm}
                   onChange={event => setSearchTerm(event.target.value)}
@@ -150,26 +171,34 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
                 </div>
               </div>
 
-              <div className="pt-2 pb-2 flex justify-between items-center">
+              <div
+                className={`px-2 pt-2 pb-2 flex justify-between items-center relative ${
+                  showFilters && ` shadow-md z-2 `
+                }`}
+              >
                 <p className="text-xs md:text-sm">
                   <strong>{projects.length}</strong> Results
                 </p>
 
                 <div className="flex items-center">
-                  <div className="mr-2 w-20">
-                    <select
-                      defaultValue={null}
-                      id="country"
-                      className="text-gray-500 mr-2 block form-select w-full py-2 px-2 pr-6 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5 truncate"
+                  <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    type="button"
+                    className="bg-white bg-opacity-25 px-2 py-2 mr-2 rounded-md inline-flex border-white border border-opacity-0 items-center text-sm focus:outline-none focus:border-opacity-100 focus:shadow-md focus:bg-opacity-100 focus:text-brand-blue focus:outline-none hover:border-opacity-100 hover:shadow-md hover:bg-opacity-100 hover:text-brand-blue transition-bg duration-100 ease-in-out"
+                  >
+                    <svg
+                      className="w-4 h-4 mr-2"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
                     >
-                      <option value={null}>Year</option>
-                      {new Array(30).fill('').map((_, i) => (
-                        <option value={new Date().getFullYear() - i}>
-                          {new Date().getFullYear() - i}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                      <path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                    </svg>
+                    {showFilters ? 'Hide Filters' : 'Filter Results'}
+                  </button>
 
                   <button
                     disabled={searchTerm.length === 0 || resultsLoading}
@@ -222,27 +251,70 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
                   </button>
                 </div>
               </div>
+              {showFilters && (
+                <div className="px-2 py-4 top-full l-0 r-0 w-full bg-brand-gray">
+                  <div className="grid grid-cols-2 gap-2 grid-flow-row">
+                    <Select
+                      label="Year Completed"
+                      fallback="Any"
+                      options={years}
+                      value={filters.year}
+                      onChange={year => setFilters({ ...filters, year })}
+                    />
+                  </div>
+                </div>
+              )}
             </form>
           </div>
 
-          {/* <div className="absolute top-0 left-0 max-h-screen overflow-scroll bg-white text-sm max-w-2xl">
-            <pre>
-              <code>{JSON.stringify(jobs, null, 2)}</code>
-            </pre>
-          </div> */}
-
-          <div className="md:overflow-y-scroll md:flex-grow block">
-            <ul className="flex md:block overflow-x-scroll md:overflow-auto">
-              {projects.map(project => (
-                <ProjectListItem
-                  onClick={() => setActiveItem(project.Id)}
-                  project={project}
-                  key={project.Id}
-                  currentId={activeItem}
-                />
-              ))}
-            </ul>
-          </div>
+          {projects.length > 0 ? (
+            <div className="md:overflow-y-scroll md:flex-grow block">
+              <ul className="flex md:block overflow-x-scroll md:overflow-auto">
+                {projects.map(project => (
+                  <ProjectListItem
+                    onClick={() => setActiveItem(project.Id)}
+                    project={project}
+                    key={project.Id}
+                    currentId={activeItem}
+                  />
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <div className="text-center p-4 h-full flex flex-col justify-center items-center text-center flex-grow">
+              <div className="w-28 h-28 mx-auto mb-8 opacity-75">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 64 645"
+                  className="w-full fill-current text-brand-navy mx-auto"
+                >
+                  <path
+                    fill="#6EA663"
+                    d="M39.623 31.628H0v7.907h39.623v-7.907zM39.623 19.767H0v7.907h39.623v-7.907zM39.623 43.488H0v7.907h39.623v-7.907zM39.623 55.349H0v7.907h39.623v-7.907z"
+                  ></path>
+                  <path
+                    fill="#5C8AE6"
+                    d="M51.51 19.767h-7.925v19.768h7.924V19.768zM63.396 19.767h-7.924v19.768h7.924V19.768zM63.396 43.488h-7.924v19.768h7.924V43.488zM51.51 43.488h-7.925v19.768h7.924V43.488z"
+                  ></path>
+                  <path
+                    fill="#738799"
+                    d="M0 15.814h39.623L63.396 0H23.774L0 15.814z"
+                  ></path>
+                </svg>
+              </div>
+              <p className="text-gray-400 uppercase text-sm font-semibold">
+                Welcome to the
+              </p>
+              <h1 className="text-lg md:text-2xl font-semibold">
+                Marshall Project Map
+              </h1>
+              <p className="mt-4">
+                Use the filters above to search for ongoing and completed
+                projects.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

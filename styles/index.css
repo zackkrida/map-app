@@ -42,4 +42,21 @@ body {
   z-index: 3;
 }
 
+[data-reach-listbox-popover] {
+  z-index: 20;
+}
+
+[data-reach-listbox-popover] {
+  padding: 0;
+  border: none;
+}
+
+[data-reach-listbox-option][aria-selected='true'] {
+  @apply .text-white .bg-brand-blue !important;
+}
+
+[data-reach-listbox-option][data-current] span {
+  @apply .font-semibold !important;
+}
+
 @tailwind utilities;
