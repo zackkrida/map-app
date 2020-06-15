@@ -9,11 +9,11 @@ import { useLazyRequest } from 'lib/useLazyRequest'
 import { useRouter } from 'next/router'
 import { Select } from './Select'
 
-enum SearchTypes {
-  Name = 'name',
-  Zip = 'zip',
-  Address = 'address',
-}
+const SearchTypes = [
+  { value: 'zip', name: 'Zip Code' },
+  { value: 'city', name: 'Project City' },
+  { value: 'name', name: 'Customer Last Name' },
+]
 
 export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
   const mapRef = useRef()
@@ -23,7 +23,7 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
 
   const [searchCount, setSearchCount] = useState(0)
   const [searchTerm, setSearchTerm] = useState('')
-  const [searchType, setSearchType] = useState<SearchTypes>(SearchTypes.Zip)
+  const [searchType, setSearchType] = useState<any>(SearchTypes[0])
   const [resultsLoading, setResultsLoading] = useState(false)
 
   const today = new Date()
@@ -36,12 +36,14 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
 
   const [showFilters, setShowFilters] = useState(false)
   const [filters, setFilters] = useState({
-    year: '',
+    year: 'any',
+    status: 'any',
   })
 
   const { data: projects, fetchMore } = useLazyRequest(`/api/project`, {
     searchTerm,
-    searchType,
+    type: searchType.value,
+    ...filters,
   })
 
   // Show filters if haven't searched yet
@@ -65,12 +67,16 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
   // Submit search whenver the page's url updates and contains a search param
   useEffect(() => {
     if ('searchTerm' in router.query) {
+      const searchParams = {
+        searchTerm: router.query.searchTerm,
+        type: router.query.searchType,
+        ...filters,
+      }
+
+      setSearchCount(searchCount + 1)
       setSearchTerm(router.query.searchTerm as string)
       setResultsLoading(true)
-      fetchMore({
-        searchTerm: router.query.searchTerm,
-        searchType: router.query.searchType,
-      }).then(_ => setResultsLoading(false))
+      fetchMore(searchParams).then(_ => setResultsLoading(false))
     }
   }, [router.query])
 
@@ -84,7 +90,12 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
     event.preventDefault()
     router.push({
       pathname: router.pathname,
-      query: { ...router.query, searchTerm, searchType },
+      query: {
+        ...router.query,
+        searchTerm,
+        searchType,
+        ...filters,
+      },
     })
   }
 
@@ -151,20 +162,18 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
                   value={searchTerm}
                   onChange={event => setSearchTerm(event.target.value)}
                   className="flex-1 block w-full form-input pr-28 placeholder-cool-gray-500"
-                  placeholder={`Search projects by ${searchType}`}
+                  placeholder="Search projects by"
                 />
                 <div className="absolute inset-y-0 right-0 flex items-center">
                   <select
                     aria-label="Search Type"
-                    value={searchType}
-                    onChange={event =>
-                      setSearchType(event.target.value as SearchTypes)
-                    }
+                    value={searchType.value}
+                    onChange={event => setSearchType(event.target.value)}
                     className="form-select h-full py-0 pl-2 pr-7 border-transparent bg-transparent text-gray-500 sm:text-sm sm:leading-5 rounded-r-md rounded-l-none bg-blue-100 border-l border-blue-200"
                   >
-                    {Object.entries(SearchTypes).map(([key, value]) => (
-                      <option key={key} value={value}>
-                        {key}
+                    {SearchTypes.map(searchType => (
+                      <option key={searchType.name} value={searchType.value}>
+                        {searchType.name}
                       </option>
                     ))}
                   </select>
@@ -255,11 +264,21 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
                 <div className="px-2 py-4 top-full l-0 r-0 w-full bg-brand-gray">
                   <div className="grid grid-cols-2 gap-2 grid-flow-row">
                     <Select
-                      label="Year Completed"
+                      label="Created After"
                       fallback="Any"
                       options={years}
                       value={filters.year}
                       onChange={year => setFilters({ ...filters, year })}
+                    />
+                    <Select
+                      label="Status"
+                      fallback="Any"
+                      options={[
+                        { value: 'in-progress', name: 'In Progress' },
+                        { value: 'completed', name: 'Completed' },
+                      ]}
+                      value={filters.status}
+                      onChange={status => setFilters({ ...filters, status })}
                     />
                   </div>
                 </div>
@@ -267,7 +286,7 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
             </form>
           </div>
 
-          {projects.length > 0 ? (
+          {projects.length > 0 && (
             <div className="md:overflow-y-scroll md:flex-grow block">
               <ul className="flex md:block overflow-x-scroll md:overflow-auto">
                 {projects.map(project => (
@@ -280,7 +299,16 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
                 ))}
               </ul>
             </div>
-          ) : (
+          )}
+          {searchCount > 0 && projects.length === 0 && (
+            <div className="text-center p-4 h-full flex flex-col justify-center items-center text-center flex-grow">
+              <p className="mb-3">
+                No results for your current search and filters.
+              </p>
+              <p>Try making your search less specific.</p>
+            </div>
+          )}
+          {searchCount === 0 && (
             <div className="text-center p-4 h-full flex flex-col justify-center items-center text-center flex-grow">
               <div className="w-28 h-28 mx-auto mb-8 opacity-75">
                 <svg

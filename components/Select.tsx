@@ -33,7 +33,9 @@ export function Select({
               type="button"
               className="cursor-default relative w-full rounded-md border border-gray-300 bg-white pl-3 pr-10 py-2 text-left focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition ease-in-out duration-150 sm:text-sm sm:leading-5"
             >
-              <span className="block truncate">{value || fallback}</span>
+              <span className="block truncate">
+                {options.find(i => i.value === value)?.name || fallback}
+              </span>
               <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                 <svg
                   className="h-5 w-5 text-gray-400"
@@ -54,6 +56,15 @@ export function Select({
         </div>
         <ListboxPopover className="absolute mt-1 w-full rounded-md bg-white shadow-lg outline-none">
           <ListboxList className="max-h-60 rounded-md py-1 text-base leading-6 shadow-xs overflow-auto focus:outline-none sm:text-sm sm:leading-5">
+            {fallback && (
+              <ListboxOption
+                className="text-gray-900 cursor-default select-none relative py-2 pl-3 pr-9"
+                key={''}
+                value={'any'}
+              >
+                {fallback}
+              </ListboxOption>
+            )}
             {options.length > 0 ? (
               options.map(option => {
                 const active = option.value === value
