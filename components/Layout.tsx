@@ -93,7 +93,7 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
       query: {
         ...router.query,
         searchTerm,
-        searchType,
+        searchType: searchType.value,
         ...filters,
       },
     })
@@ -300,7 +300,7 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
               </ul>
             </div>
           )}
-          {searchCount > 0 && projects.length === 0 && (
+          {searchCount > 0 && projects.length === 0 && !resultsLoading && (
             <div className="text-center p-4 h-full flex flex-col justify-center items-center text-center flex-grow">
               <p className="mb-3">
                 No results for your current search and filters.
