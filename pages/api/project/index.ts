@@ -12,10 +12,15 @@ export default async function Jobs(req, res) {
 
   console.info({ type })
 
-  if (type === 'zip') filters.i360__Appointment_Zip__c = { $eq: searchTerm }
-  if (type === 'name') filters.Name = { $like: `%${searchTerm}%` }
-  if (type === 'city')
+  if (type === 'zip') {
+    filters.i360__Appointment_Zip__c = { $eq: searchTerm }
+  }
+  if (type === 'name') {
+    filters.Name = { $like: `%${searchTerm}%` }
+  }
+  if (type === 'city') {
     filters.i360__Customer_City__c = { $like: `%${searchTerm}%` }
+  }
   if (year !== 'any') {
     let createdDate = SfDate.toDateTimeLiteral(new Date(year))
     filters.CreatedDate = {

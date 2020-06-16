@@ -9,21 +9,21 @@ import { useLazyRequest } from 'lib/useLazyRequest'
 import { useRouter } from 'next/router'
 import { Select } from './Select'
 
-const SearchTypes = [
-  { value: 'zip', name: 'Zip Code' },
-  { value: 'city', name: 'Project City' },
-  { value: 'name', name: 'Customer Last Name' },
-]
-
 export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
   const mapRef = useRef()
   const mapsRef = useRef()
 
   const router = useRouter()
 
+  const searchTypes = [
+    { value: 'zip', name: 'Zip Code' },
+    { value: 'city', name: 'Project City' },
+    { value: 'name', name: 'Customer Last Name' },
+  ]
+
   const [searchCount, setSearchCount] = useState(0)
   const [searchTerm, setSearchTerm] = useState('')
-  const [searchType, setSearchType] = useState<any>(SearchTypes[0])
+  const [searchType, setSearchType] = useState<any>(searchTypes[0])
   const [resultsLoading, setResultsLoading] = useState(false)
 
   const today = new Date()
@@ -45,13 +45,6 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
     type: searchType.value,
     ...filters,
   })
-
-  // Show filters if haven't searched yet
-  useEffect(() => {
-    if (searchCount === 0) {
-      setShowFilters(true)
-    }
-  }, [searchCount])
 
   // Re-fit map whenever we get new projects
   useEffect(() => {
@@ -168,10 +161,14 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
                   <select
                     aria-label="Search Type"
                     value={searchType.value}
-                    onChange={event => setSearchType(event.target.value)}
+                    onChange={event => {
+                      setSearchType(
+                        searchTypes.find(i => i.value === event.target.value)
+                      )
+                    }}
                     className="form-select h-full py-0 pl-2 pr-7 border-transparent bg-transparent text-gray-500 sm:text-sm sm:leading-5 rounded-r-md rounded-l-none bg-blue-100 border-l border-blue-200"
                   >
-                    {SearchTypes.map(searchType => (
+                    {searchTypes.map(searchType => (
                       <option key={searchType.name} value={searchType.value}>
                         {searchType.name}
                       </option>
