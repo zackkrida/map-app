@@ -19,6 +19,7 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
     { value: 'zip', name: 'Zip Code' },
     { value: 'city', name: 'Project City' },
     { value: 'name', name: 'Customer Last Name' },
+    { value: 'streetAddress', name: 'Customer Street Address' },
   ]
 
   const [searchCount, setSearchCount] = useState(0)

@@ -21,6 +21,9 @@ export default async function Jobs(req, res) {
   if (type === 'city') {
     filters.i360__Customer_City__c = { $like: `%${searchTerm}%` }
   }
+  if (type === 'streetAddress') {
+    filters.i360__Customer_Street__c = { $like: `%${searchTerm}%` }
+  }
   if (year !== 'any') {
     let createdDate = SfDate.toDateTimeLiteral(new Date(year))
     filters.CreatedDate = {
