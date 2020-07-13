@@ -39,6 +39,7 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
   const [filters, setFilters] = useState({
     year: 'any',
     status: 'any',
+    jobType: 'any',
   })
 
   const { data: projects, fetchMore } = useLazyRequest(`/api/project`, {
@@ -277,6 +278,19 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
                       ]}
                       value={filters.status}
                       onChange={status => setFilters({ ...filters, status })}
+                    />
+                    <Select
+                      label="Job Type"
+                      fallback="Any"
+                      options={[
+                        { value: 'Roofing', name: 'Roofing' },
+                        { value: 'Siding', name: 'Siding' },
+                        { value: 'Doors', name: 'Doors' },
+                        { value: 'Windows', name: 'Windows' },
+                        { value: 'Warranty', name: 'Warranty' },
+                      ]}
+                      value={filters.jobType}
+                      onChange={jobType => setFilters({ ...filters, jobType })}
                     />
                   </div>
                 </div>

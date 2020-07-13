@@ -25,13 +25,13 @@ export function ProjectListItem({
       >
         <div className="flex items-center  px-2 md:px-4 py-4">
           <div className="min-w-0 flex-1 flex items-center">
-            <div className="flex-shrink-0">
+            {/* <div className="flex-shrink-0">
               <img
                 className="h-12 w-12 rounded-full"
                 src="/images/house.jpg"
                 alt=""
               />
-            </div>
+            </div> */}
             <div className="min-w-0 flex-1 pl-2 md:px-4">
               <div>
                 <div className="text-sm leading-5 font-medium text-blue-600 truncate">

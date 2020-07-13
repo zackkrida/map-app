@@ -1,6 +1,7 @@
 import Skeleton from 'react-loading-skeleton'
 import { useRouter } from 'next/router'
 import { getBrandColor, prettyDate } from 'lib/utils'
+import { Logo } from './Logo'
 
 export function Project({ project }) {
   const router = useRouter()
@@ -12,7 +13,7 @@ export function Project({ project }) {
     <div className="bg-white shadow overflow-hidden shadow-md sm:rounded-lg w-full relative">
       <button
         onClick={() => router.back()}
-        className="absolute left-4 top-4 bg-white bg-opacity-50 rounded-full text-white cursor-pointer focus:outline-none"
+        className="absolute left-4 top-4 bg-brand-navy bg-opacity-50 rounded-full text-white cursor-pointer focus:outline-none"
       >
         <svg
           className="w-12 h-12 md:w-16 md:h-16 p-3"
@@ -27,11 +28,14 @@ export function Project({ project }) {
         </svg>
       </button>
       <div>
-        <img
+        <div className="max-w-md mx-auto md:pb-0 md:pt-12 md:px-0 px-12 py-4">
+          <Logo />
+        </div>
+        {/* <img
           className="h-80 w-full object-cover"
           src="/images/house-big.jpg"
           alt=""
-        />
+        /> */}
       </div>
 
       <div className="px-4 py-5 border-b border-gray-200 sm:px-6">

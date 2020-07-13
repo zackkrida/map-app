@@ -8,6 +8,7 @@ export default async function Jobs(req, res) {
     type = 'zip',
     year = 'any',
     status = 'any',
+    jobType = 'any',
   } = JSON.parse(req.body)
 
   console.info({ type })
@@ -36,6 +37,10 @@ export default async function Jobs(req, res) {
     } else {
       filters.i360__Completed_On__c = { $ne: null }
     }
+  }
+
+  if (jobType !== 'any') {
+    filters.i360__Job_Type_formatted__c = { $like: `%${jobType}%` }
   }
 
   try {
