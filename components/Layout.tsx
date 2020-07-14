@@ -8,7 +8,7 @@ import { Marker } from './Marker'
 import { useLazyRequest } from 'lib/useLazyRequest'
 import { useRouter } from 'next/router'
 import { Select } from './Select'
-
+import useSWR from 'swr'
 export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
   const mapRef = useRef()
   const mapsRef = useRef()
@@ -40,12 +40,23 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
     year: 'any',
     status: 'any',
     jobType: 'any',
+    productColor: 'any',
   })
 
-  const { data: projects, fetchMore } = useLazyRequest(`/api/project`, {
-    searchTerm,
-    type: searchType.value,
-    ...filters,
+  const { data: projects, fetchMore: fetchMoreProjects } = useLazyRequest(
+    `/api/project`,
+    {
+      searchTerm,
+      type: searchType.value,
+      ...filters,
+    }
+  )
+
+  const {
+    data: productColors = [],
+    fetchMore: fetchMoreProductColors,
+  } = useLazyRequest(`/api/product-colors`, {
+    type: filters.jobType === 'any' ? null : filters.jobType,
   })
 
   // Re-fit map whenever we get new projects
@@ -59,6 +70,13 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
     )
   }, [projects])
 
+  // load product colors whenever a product type is selected
+  useEffect(() => {
+    if ('jobType' in router.query) {
+      fetchMoreProductColors()
+    }
+  })
+
   // Submit search whenver the page's url updates and contains a search param
   useEffect(() => {
     if ('searchTerm' in router.query) {
@@ -71,7 +89,7 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
       setSearchCount(searchCount + 1)
       setSearchTerm(router.query.searchTerm as string)
       setResultsLoading(true)
-      fetchMore(searchParams).then(_ => setResultsLoading(false))
+      fetchMoreProjects(searchParams).then(_ => setResultsLoading(false))
     }
   }, [router.query])
 
@@ -292,6 +310,23 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
                       value={filters.jobType}
                       onChange={jobType => setFilters({ ...filters, jobType })}
                     />
+                    {['Roofing', 'Siding', 'Windows'].includes(
+                      filters.jobType
+                    ) && (
+                      <Select
+                        truncateItems={false}
+                        label="Product Color"
+                        fallback="Any"
+                        options={productColors.map(i => ({
+                          value: i,
+                          name: i,
+                        }))}
+                        value={filters.productColor}
+                        onChange={productColor =>
+                          setFilters({ ...filters, productColor })
+                        }
+                      />
+                    )}
                   </div>
                 </div>
               )}

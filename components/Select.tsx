@@ -11,6 +11,7 @@ export function Select({
   fallback = 'Any',
   options = [],
   value = '',
+  truncateItems = true,
   onChange,
 }) {
   return (
@@ -76,7 +77,11 @@ export function Select({
                     value={option.value}
                     label={option.name}
                   >
-                    <span className="font-normal block truncate">
+                    <span
+                      className={`font-normal block ${
+                        truncateItems ? 'truncate' : ''
+                      }`}
+                    >
                       {option.name}
                     </span>
                     {active && <Checkmark />}

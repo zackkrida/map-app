@@ -14,7 +14,7 @@ export const postFetcher = (url, data = {}) =>
   fetch(url, {
     method: 'POST',
     body: JSON.stringify(data),
-    headers: { 'Content-Type': 'text/json' },
+    headers: { 'Content-Type': 'application/json' },
   }).then(res => res.json())
 
 export const ProductColors = {
@@ -49,4 +49,8 @@ export const getMapBoundsFromProjects = (maps, projects: any[]) => {
   })
 
   return bounds
+}
+
+export function onlyUnique(value, index, self) {
+  return self.indexOf(value) === index
 }

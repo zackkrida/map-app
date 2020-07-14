@@ -9,7 +9,7 @@ export default async function Jobs(req, res) {
     year = 'any',
     status = 'any',
     jobType = 'any',
-  } = JSON.parse(req.body)
+  } = req.body
 
   console.info({ type })
 
