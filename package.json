@@ -15,7 +15,7 @@
     "google-map-react": "^1.1.7",
     "googleapis": "^52.1.0",
     "jsforce": "^1.9.3",
-    "next": "^9.4.5-canary.12",
+    "next": "^9.4.5-canary.32",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "react-loading-skeleton": "^2.0.1",

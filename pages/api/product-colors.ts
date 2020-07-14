@@ -9,14 +9,17 @@ export default async function Project(req, res) {
   if (type === 'Siding') key = 'Siding_Product_Color__c'
   if (type === 'Windows') key = 'Trim_Color__c'
 
+  if (!key) {
+    res.json([])
+    return
+  }
+
   try {
     const t60 = await connectTo360()
     const projects = await t60
       .sobject('i360__Project__c')
       .select([key])
       .where({ [key]: { $ne: null } })
-
-    console.info(projects)
 
     res.json(
       projects
