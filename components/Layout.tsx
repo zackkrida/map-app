@@ -151,13 +151,13 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
               {projects &&
                 projects.map(
                   i =>
-                    i.i360__Appointment_Latitude__c !== null && (
+                    i.Latitude__c !== null && (
                       <Marker
                         active={i.Id === activeItem}
                         onClick={() => setActiveItem(i.Id)}
                         key={i.Id}
-                        lat={i.i360__Appointment_Latitude__c}
-                        lng={i.i360__Appointment_Longitude__c}
+                        lat={Number(i.Latitude__c)}
+                        lng={Number(i.Long__c)}
                       />
                     )
                 )}

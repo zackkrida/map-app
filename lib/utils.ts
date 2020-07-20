@@ -35,15 +35,9 @@ export const getMapBoundsFromProjects = (maps, projects: any[]) => {
   const bounds = new maps.LatLngBounds()
 
   projects.forEach(project => {
-    if (
-      project.i360__Appointment_Latitude__c &&
-      project.i360__Appointment_Longitude__c
-    ) {
+    if (project.Latitude__c && project.Long__c) {
       bounds.extend(
-        new maps.LatLng(
-          project.i360__Appointment_Latitude__c,
-          project.i360__Appointment_Longitude__c
-        )
+        new maps.LatLng(Number(project.Latitude__c), Number(project.Long__c))
       )
     }
   })

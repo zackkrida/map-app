@@ -1,6 +1,6 @@
 import { connectTo360 } from 'lib/three60'
 import { Client, Status } from '@googlemaps/google-maps-services-js'
-import { config } from 'process'
+import chunk from 'lodash/chunk'
 
 /**
  * 1. Pull down all Jobs in 360 without lat, lng attributes
@@ -13,7 +13,6 @@ export default async function Geocode(_, res) {
     const mapClient = new Client({})
     const geolocate = address =>
       mapClient.geocode({
-        data: {},
         params: { key: process.env.GOOGLE_GEOCODING_API_KEY, address },
       })
     const t60 = await connectTo360()
@@ -23,14 +22,37 @@ export default async function Geocode(_, res) {
       .sobject('i360__Project__c')
       .select(['*'])
       .where({Latitude__c: null, Long__c: null})
-      .limit(1)
+      .maxFetch(200)
 
     // const geo = await geolocate(buildAddressString(projects[0]))
     // const result = geo.data.results[0].geometry.location
+    const createUpdateRecord = project =>
+      geolocate(buildAddressString(project)).then(geo => ({
+        Id: project.Id,
+        Latitude__c: geo.data.results[0].geometry.location.lat,
+        Long__c: geo.data.results[0].geometry.location.lng,
+      }))
 
-    res.json({ projects })
+    const chunkedProjects = chunk(projects, 50)
+    let geoResults = []
+    for (const projChunk of chunkedProjects) {
+      const updatedProjects = await Promise.all(
+        projChunk.map(createUpdateRecord)
+      )
+      geoResults.push(...updatedProjects)
+      await new Promise(r => setTimeout(r, 1000))
+    }
+
+    // const updatedProjects = await Promise.all(projects.map(createUpdateRecord))
+
+    const updateIn360Res = await t60
+      .sobject('i360__Project__c')
+      .update(geoResults)
+
+    res.json({ projects: projects.length })
   } catch (error) {
     console.error(error.message)
+    console.error(error)
     res.json({ error: true, message: error.message })
   }
 }
