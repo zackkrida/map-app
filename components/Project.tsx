@@ -13,10 +13,10 @@ export function Project({ project }) {
     <div className="bg-white shadow overflow-hidden shadow-md sm:rounded-lg w-full relative">
       <button
         onClick={() => router.back()}
-        className="absolute left-4 top-4 bg-brand-navy bg-opacity-50 rounded-full text-white cursor-pointer focus:outline-none"
+        className="absolute left-4 top-4 rounded-full text-white cursor-pointer focus:outline-none focus:shadow-outline-blue"
       >
         <svg
-          className="w-12 h-12 md:w-16 md:h-16 p-3"
+          className="w-12 h-12 md:w-14 md:h-14 p-2 text-brand-gray"
           fill="none"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -165,6 +165,30 @@ export function Project({ project }) {
             </dd>
           </div>
         </dl>
+      </div>
+      <div className="mt-8 sm:mt-0 flex sm:gap-4 sm:px-6 sm:py-5">
+        {/* <dt className="text-sm leading-5 font-medium text-gray-500">
+          360 Info
+        </dt> */}
+        <dd className="ml-auto mt-1 text-sm leading-5 text-gray-900 sm:mt-0 mb-4 sm:mb-0 mr-4 sm:mr-0">
+          <a
+            className="px-4 py-2 bg-brand-orange rounded-sm text-white inline-flex focus:outline-none focus:shadow-outline-orange   "
+            target="_blank"
+            rel="noopener noreferrer"
+            href={`https://improveit360-3562.cloudforce.com/${project?.Id}`}
+          >
+            View in 360
+            <svg
+              className="w-4 h-4 ml-1"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+              <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+            </svg>
+          </a>
+        </dd>
       </div>
     </div>
   )
