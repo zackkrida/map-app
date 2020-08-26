@@ -4,11 +4,11 @@ import Link from 'next/link'
 import { useEffect, useState, useRef } from 'react'
 import { Logo } from '../components/Logo'
 import { ProjectListItem } from '../components/ProjectListItem'
-import { Marker } from './Marker'
+import { Marker, StatusColorBg, getMarkerColor } from './Marker'
 import { useLazyRequest } from 'lib/useLazyRequest'
 import { useRouter } from 'next/router'
 import { Select } from './Select'
-import useSWR from 'swr'
+
 export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
   const mapRef = useRef()
   const mapsRef = useRef()
@@ -155,6 +155,8 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
                       <Marker
                         active={i.Id === activeItem}
                         onClick={() => setActiveItem(i.Id)}
+                        color={getMarkerColor(i)}
+                        hoverColor={getMarkerColor(i, 'hover')}
                         key={i.Id}
                         lat={Number(i.Latitude__c)}
                         lng={Number(i.Long__c)}
@@ -388,6 +390,21 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
                 Use the filters above to search for ongoing and completed
                 projects.
               </p>
+
+              <h3 className="text-md font-bold mt-4">Marker Color Legend</h3>
+              <ul className="mt-4 text-sm">
+                {Object.entries(StatusColorBg).map(([key, value]) => (
+                  <li
+                    key={key}
+                    className="flex justify-between items-center gap-2 pb-2"
+                  >
+                    <span
+                      className={`rounded-full block w-4 h-4 mr-4 border-opacity-75 border-2 ${value}`}
+                    ></span>
+                    {key}
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </div>
