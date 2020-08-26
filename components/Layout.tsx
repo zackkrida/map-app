@@ -156,7 +156,6 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
                         active={i.Id === activeItem}
                         onClick={() => setActiveItem(i.Id)}
                         color={getMarkerColor(i)}
-                        hoverColor={getMarkerColor(i, 'hover')}
                         key={i.Id}
                         lat={Number(i.Latitude__c)}
                         lng={Number(i.Long__c)}

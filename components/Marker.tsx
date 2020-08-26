@@ -1,11 +1,4 @@
-export function Marker({
-  active = false,
-  lat,
-  lng,
-  color,
-  hoverColor,
-  ...props
-}) {
+export function Marker({ active = false, lat, lng, color, ...props }) {
   return (
     <div
       {...props}
