@@ -20,6 +20,11 @@ body {
   padding: 0 !important;
 }
 
+.info-modal[data-reach-dialog-content] {
+  width: 300px !important;
+  max-width: calc(100% - 20px) !important;
+}
+
 :disabled {
   @apply .cursor-not-allowed;
 }

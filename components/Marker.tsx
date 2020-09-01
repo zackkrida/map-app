@@ -3,22 +3,23 @@ export function Marker({ active = false, lat, lng, color, ...props }) {
     <div
       {...props}
       className={`Marker ${color} block w-8 h-8 hover:scale-110 duration-75 ease-in-out transform -translate-y-1/2 -translate-x-1/2 cursor-pointer origin-bottom ${
-        active ? `'hover:opacity-75 scale-125 z-10` : ''
+        active ? `'scale-125 z-10` : ''
       }`}
       lat={lat}
       lng={lng}
     >
       <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 20 20"
         fill="currentColor"
         stroke="#fff"
         strokeWidth={0.5}
-        viewBox="0 0 20 20"
       >
         <path
-          d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
           fillRule="evenodd"
+          d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
           clipRule="evenodd"
-        ></path>
+        />
       </svg>
     </div>
   )
@@ -36,7 +37,7 @@ export enum StatusColorBg {
 }
 
 export enum StatusColor {
-  Legacy = 'text-brand-gray hover:opacity-75',
-  Progress = 'text-brand-orange hover:opacity-75',
-  Completed = 'text-brand-blue hover:opacity-75',
+  Legacy = 'text-brand-gray',
+  Progress = 'text-brand-orange',
+  Completed = 'text-brand-blue',
 }

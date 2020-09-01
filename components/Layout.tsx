@@ -8,6 +8,7 @@ import { Marker, StatusColorBg, getMarkerColor } from './Marker'
 import { useLazyRequest } from 'lib/useLazyRequest'
 import { useRouter } from 'next/router'
 import { Select } from './Select'
+import Dialog from '@reach/dialog'
 
 export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
   const mapRef = useRef()
@@ -15,16 +16,18 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
 
   const router = useRouter()
 
-  const searchTypes = [
+  const types = [
     { value: 'zip', name: 'Zip Code' },
-    { value: 'city', name: 'Project City' },
-    { value: 'name', name: 'Customer Last Name' },
-    { value: 'streetAddress', name: 'Customer Street Address' },
+    { value: 'city', name: 'City/Town' },
+    { value: 'name', name: 'Last Name' },
+    { value: 'streetAddress', name: 'Street Address' },
+    { value: 'productColor', name: 'Product Color' },
+    { value: 'productType', name: 'Product Type' },
   ]
 
   const [searchCount, setSearchCount] = useState(0)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [searchType, setSearchType] = useState<any>(searchTypes[0])
+  const [q, setQ] = useState('')
+  const [type, setType] = useState<any>(types[0])
   const [resultsLoading, setResultsLoading] = useState(false)
 
   const today = new Date()
@@ -46,8 +49,8 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
   const { data: projects, fetchMore: fetchMoreProjects } = useLazyRequest(
     `/api/project`,
     {
-      searchTerm,
-      type: searchType.value,
+      q,
+      type: type.value,
       ...filters,
     }
   )
@@ -79,15 +82,15 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
 
   // Submit search whenver the page's url updates and contains a search param
   useEffect(() => {
-    if ('searchTerm' in router.query) {
+    if ('q' in router.query) {
       const searchParams = {
-        searchTerm: router.query.searchTerm,
-        type: router.query.searchType,
+        q: router.query.q,
+        type: router.query.type,
         ...filters,
       }
 
       setSearchCount(searchCount + 1)
-      setSearchTerm(router.query.searchTerm as string)
+      setQ(router.query.q as string)
       setResultsLoading(true)
       fetchMoreProjects(searchParams).then(_ => setResultsLoading(false))
     }
@@ -101,14 +104,23 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
 
   function handleSubmit(event) {
     event.preventDefault()
+
+    let query = {
+      ...router.query,
+      q,
+      type: type.value,
+    }
+
+    // Add non-'any' filters to the search
+    for (const [filterName, filterValue] of Object.entries(filters)) {
+      if (filterValue !== 'any') {
+        query[filterName] = filterValue
+      }
+    }
+
     router.push({
       pathname: router.pathname,
-      query: {
-        ...router.query,
-        searchTerm,
-        searchType: searchType.value,
-        ...filters,
-      },
+      query,
     })
   }
 
@@ -135,9 +147,7 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
               defaultZoom={9.5}
               options={{
                 fullscreenControl: false,
-                zoomControlOptions: {
-                  position: 6,
-                },
+                zoomControlOptions: { position: 4 },
               }}
               bootstrapURLKeys={{
                 key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
@@ -173,25 +183,23 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
             <form className="relative" onSubmit={handleSubmit}>
               <div className="mx-2 flex md:rounded-md shadow-sm relative rounded-none rounded-l-md transition duration-150 ease-in-out sm:text-sm sm:leading-5  text-brand-navy">
                 <input
-                  value={searchTerm}
-                  onChange={event => setSearchTerm(event.target.value)}
+                  value={q}
+                  onChange={event => setQ(event.target.value)}
                   className="flex-1 block w-full form-input pr-28 placeholder-cool-gray-500"
                   placeholder="Search projects by"
                 />
                 <div className="absolute inset-y-0 right-0 flex items-center">
                   <select
                     aria-label="Search Type"
-                    value={searchType.value}
+                    value={type.value}
                     onChange={event => {
-                      setSearchType(
-                        searchTypes.find(i => i.value === event.target.value)
-                      )
+                      setType(types.find(i => i.value === event.target.value))
                     }}
                     className="form-select h-full py-0 pl-2 pr-7 border-transparent bg-transparent text-gray-500 sm:text-sm sm:leading-5 rounded-r-md rounded-l-none bg-blue-100 border-l border-blue-200"
                   >
-                    {searchTypes.map(searchType => (
-                      <option key={searchType.name} value={searchType.value}>
-                        {searchType.name}
+                    {types.map(type => (
+                      <option key={type.name} value={type.value}>
+                        {type.name}
                       </option>
                     ))}
                   </select>
@@ -228,7 +236,7 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
                   </button>
 
                   <button
-                    disabled={searchTerm.length === 0 || resultsLoading}
+                    disabled={q.length === 0 || resultsLoading}
                     type="submit"
                     className="appearance-none inline-flex items-center px-2 py-2 rounded-md border border-l-0 border-blue-500 bg-brand-blue text-white text-sm active:bg-blue-500"
                   >
@@ -280,7 +288,7 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
               </div>
               {showFilters && (
                 <div className="px-2 py-4 top-full l-0 r-0 w-full bg-brand-gray">
-                  <div className="grid grid-cols-2 gap-2 grid-flow-row">
+                  <div className="grid grid-cols-3 gap-2 grid-flow-row">
                     <Select
                       label="Created After"
                       fallback="Any"
@@ -357,57 +365,95 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
             </div>
           )}
           {searchCount === 0 && (
-            <div className="text-center p-4 h-full flex flex-col justify-center items-center text-center flex-grow">
-              <div className="w-28 h-28 mx-auto mb-8 opacity-75">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 64 645"
-                  className="w-full fill-current text-brand-navy mx-auto"
-                >
-                  <path
-                    fill="#6EA663"
-                    d="M39.623 31.628H0v7.907h39.623v-7.907zM39.623 19.767H0v7.907h39.623v-7.907zM39.623 43.488H0v7.907h39.623v-7.907zM39.623 55.349H0v7.907h39.623v-7.907z"
-                  ></path>
-                  <path
-                    fill="#5C8AE6"
-                    d="M51.51 19.767h-7.925v19.768h7.924V19.768zM63.396 19.767h-7.924v19.768h7.924V19.768zM63.396 43.488h-7.924v19.768h7.924V43.488zM51.51 43.488h-7.925v19.768h7.924V43.488z"
-                  ></path>
-                  <path
-                    fill="#738799"
-                    d="M0 15.814h39.623L63.396 0H23.774L0 15.814z"
-                  ></path>
-                </svg>
+            <div className="text-center p-4 flex flex-col justify-center items-center text-center flex-grow">
+              <div>
+                <p>No results found.</p>
               </div>
-              <p className="text-gray-400 uppercase text-sm font-semibold">
-                Welcome to the
-              </p>
-              <h1 className="text-lg md:text-2xl font-semibold">
-                Marshall Project Map
-              </h1>
-              <p className="mt-4">
-                Use the filters above to search for ongoing and completed
-                projects.
-              </p>
-
-              <h3 className="text-md font-bold mt-4">Marker Color Legend</h3>
-              <ul className="mt-4 text-sm">
-                {Object.entries(StatusColorBg).map(([key, value]) => (
-                  <li
-                    key={key}
-                    className="flex justify-between items-center gap-2 pb-2"
-                  >
-                    <span
-                      className={`rounded-full block w-4 h-4 mr-4 border-opacity-75 border-2 ${value}`}
-                    ></span>
-                    {key}
-                  </li>
-                ))}
-              </ul>
             </div>
           )}
         </div>
       </div>
+      <InfoModal />
     </div>
+  )
+}
+
+function InfoModal() {
+  const [showInfoModal, setShowInfoModal] = useState(false)
+
+  return (
+    <>
+      <button
+        onClick={() => setShowInfoModal(true)}
+        className="appearance-none rounded-full p-1 absolute left-2 bottom-2 bg-brand-blue hover:bg-blue-500 text-white w-8 h-8"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      </button>
+      <Dialog
+        isOpen={showInfoModal}
+        onDismiss={() => setShowInfoModal(false)}
+        className="info-modal"
+      >
+        <div className="text-center p-4 h-full flex flex-col justify-between items-center text-center flex-grow bg-white rounded shadow-md">
+          <div className="w-28 h-28 mx-auto mb-8 opacity-75">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 64 645"
+              className="w-full fill-current text-brand-navy mx-auto"
+            >
+              <path
+                fill="#6EA663"
+                d="M39.623 31.628H0v7.907h39.623v-7.907zM39.623 19.767H0v7.907h39.623v-7.907zM39.623 43.488H0v7.907h39.623v-7.907zM39.623 55.349H0v7.907h39.623v-7.907z"
+              ></path>
+              <path
+                fill="#5C8AE6"
+                d="M51.51 19.767h-7.925v19.768h7.924V19.768zM63.396 19.767h-7.924v19.768h7.924V19.768zM63.396 43.488h-7.924v19.768h7.924V43.488zM51.51 43.488h-7.925v19.768h7.924V43.488z"
+              ></path>
+              <path
+                fill="#738799"
+                d="M0 15.814h39.623L63.396 0H23.774L0 15.814z"
+              ></path>
+            </svg>
+          </div>
+          <p className="text-gray-400 uppercase text-sm font-semibold">
+            Welcome to the
+          </p>
+          <h1 className="text-lg md:text-2xl font-semibold">
+            Marshall Project Map
+          </h1>
+          <p className="mt-4">
+            Use the filters to search for ongoing and completed projects.
+          </p>
+
+          <h3 className="text-md font-bold mt-4">Marker Color Legend</h3>
+          <ul className="mt-4 text-sm">
+            {Object.entries(StatusColorBg).map(([key, value]) => (
+              <li
+                key={key}
+                className="flex justify-between items-center gap-2 pb-2"
+              >
+                <span
+                  className={`rounded-full block w-4 h-4 mr-4 border-opacity-75 border-2 ${value}`}
+                ></span>
+                {key}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </Dialog>
+    </>
   )
 }
