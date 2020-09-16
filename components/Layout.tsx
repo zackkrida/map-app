@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useEffect, useState, useRef } from 'react'
 import { Logo } from '../components/Logo'
 import { ProjectListItem } from '../components/ProjectListItem'
-import { Marker, StatusColorBg, getMarkerColor } from './Marker'
+import { Marker, StatusColorBg, StatusColor, getMarkerColor } from './Marker'
 import { useLazyRequest } from 'lib/useLazyRequest'
 import { useRouter } from 'next/router'
 import { Select } from './Select'
@@ -46,7 +46,7 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
     productColor: 'any',
   })
 
-  const { data: projects, fetchMore: fetchMoreProjects } = useLazyRequest(
+  const { data: projects = [], fetchMore: fetchMoreProjects } = useLazyRequest(
     `/api/project`,
     {
       q,
@@ -54,6 +54,11 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
       ...filters,
     }
   )
+
+  const {
+    data: legacyProjects = [],
+    fetchMore: fetchMoreLegacyProjects,
+  } = useLazyRequest('/api/legacy', { q, type: type.value, ...filters })
 
   const {
     data: productColors = [],
@@ -92,7 +97,13 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
       setSearchCount(searchCount + 1)
       setQ(router.query.q as string)
       setResultsLoading(true)
-      fetchMoreProjects(searchParams).then(_ => setResultsLoading(false))
+
+      Promise.all([
+        fetchMoreProjects(searchParams),
+        fetchMoreLegacyProjects(searchParams),
+      ]).then(_ => {
+        setResultsLoading(false)
+      })
     }
   }, [router.query])
 
@@ -158,20 +169,33 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
                 mapsRef.current = maps
               }}
             >
-              {projects &&
-                projects.map(
-                  i =>
-                    i.Latitude__c !== null && (
-                      <Marker
-                        active={i.Id === activeItem}
-                        onClick={() => setActiveItem(i.Id)}
-                        color={getMarkerColor(i)}
-                        key={i.Id}
-                        lat={Number(i.Latitude__c)}
-                        lng={Number(i.Long__c)}
-                      />
-                    )
-                )}
+              {/* {projects.map(
+                i =>
+                  i.Latitude__c !== null && (
+                    <Marker
+                      active={i.Id === activeItem}
+                      onClick={() => setActiveItem(i.Id)}
+                      color={getMarkerColor(i)}
+                      key={i.Id}
+                      lat={Number(i.Latitude__c)}
+                      lng={Number(i.Long__c)}
+                    />
+                  )
+              )} */}
+
+              {legacyProjects.map(
+                i =>
+                  i.i360__Latitude__c !== null && (
+                    <Marker
+                      key={i.Id}
+                      active={i.Id === activeItem}
+                      color={StatusColor.Legacy}
+                      lat={i.i360__Latitude__c}
+                      lng={i.i360__Longitude__c}
+                      onClick={() => setActiveItem(i.Id)}
+                    />
+                  )
+              )}
               {mapChildren}
             </GoogleMap>
           </div>
@@ -212,7 +236,8 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
                 }`}
               >
                 <p className="text-xs md:text-sm">
-                  <strong>{projects.length}</strong> Results
+                  <strong>{projects.length + legacyProjects.length}</strong>{' '}
+                  Results
                 </p>
 
                 <div className="flex items-center">
@@ -266,7 +291,7 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
                             d="M50 15A35 35 0 1 0 74.74873734152916 25.25126265847084"
                             fill="none"
                             stroke="#ffffff"
-                            stroke-width="12"
+                            strokeWidth="12"
                           ></path>
                           <path
                             d="M49 3L49 27L61 15L49 3"
@@ -350,6 +375,14 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
                     onClick={() => setActiveItem(project.Id)}
                     project={project}
                     key={project.Id}
+                    currentId={activeItem}
+                  />
+                ))}
+                {legacyProjects.map(project => (
+                  <ProjectListItem
+                    onClick={() => setActiveItem(project.Id)}
+                    project={project}
+                    key={`legacy-${project.Id}`}
                     currentId={activeItem}
                   />
                 ))}
