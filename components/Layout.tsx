@@ -9,7 +9,23 @@ import { useLazyRequest } from 'lib/useLazyRequest'
 import { useRouter } from 'next/router'
 import { Select } from './Select'
 import Dialog from '@reach/dialog'
+import { FixedSizeList as List } from 'react-window'
 
+const Row = ({ index, data, style, children }) => {
+  const item = data[index]
+
+  return (
+    <div style={style}>
+      <ProjectListItem
+        onClick={() => item.setActiveItem(item.project.Id)}
+        project={item.project}
+        key={`legacy-${item.project.Id}`}
+        currentId={item.activeItem}
+      />
+      {children}
+    </div>
+  )
+}
 export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
   const mapRef = useRef()
   const mapsRef = useRef()
@@ -370,7 +386,28 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
           {projects.length > 0 && (
             <div className="md:overflow-y-scroll md:flex-grow block">
               <ul className="flex md:block overflow-x-scroll md:overflow-auto">
-                {projects.map(project => (
+                <List
+                  height={(projects.length + legacyProjects.length) * 135}
+                  itemCount={projects.length + legacyProjects.length}
+                  itemSize={135}
+                  width={'100%'}
+                  itemData={[
+                    ...projects.map(i => ({
+                      setActiveItem,
+                      project: i,
+                      activeItem,
+                    })),
+                    ...legacyProjects.map(i => ({
+                      setActiveItem,
+                      project: i,
+                      activeItem,
+                    })),
+                  ]}
+                >
+                  {Row}
+                </List>
+
+                {/* {projects.map(project => (
                   <ProjectListItem
                     onClick={() => setActiveItem(project.Id)}
                     project={project}
@@ -385,7 +422,7 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
                     key={`legacy-${project.Id}`}
                     currentId={activeItem}
                   />
-                ))}
+                ))} */}
               </ul>
             </div>
           )}
