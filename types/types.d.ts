@@ -1,7 +1,5 @@
 interface LayoutProps {
   children?: React.ReactNode
-  mapChildren?: React.ReactNode
-  mapPos: LocationCoordinates
 }
 
 interface LocationCoordinates {
@@ -9,8 +7,9 @@ interface LocationCoordinates {
   lng: number
 }
 
-interface ProjectProps {
+interface Project {
   Id: string
+  legacy?: boolean
   i360__Completed_On__c: string
   i360__Correspondence_Name__c: string
   i360__Appointment_Address__c: string
@@ -18,4 +17,18 @@ interface ProjectProps {
   i360__Appointment_State__c: string
   i360__Appointment_Zip__c: string
   i360__Job_Type__c: string
+  Long__c: string
+  Latitude__c: string
+}
+
+interface BaseMarkerProps {
+  lat: number
+  lng: number
+  children: JSX.Element
+}
+
+interface CustomMarkerProps extends BaseMarkerProps {
+  active: boolean
+  color: string
+  onClick: React.MouseEventHandler
 }

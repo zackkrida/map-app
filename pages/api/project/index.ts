@@ -11,20 +11,21 @@ export default async function Jobs(req, res) {
     jobType = 'any',
   } = req.body
 
-  console.info({ type })
+  if (q) {
+    if (type === 'zip') {
+      filters.i360__Appointment_Zip__c = { $eq: q }
+    }
+    if (type === 'name') {
+      filters.Name = { $like: `%${q}%` }
+    }
+    if (type === 'city') {
+      filters.i360__Customer_City__c = { $like: `%${q}%` }
+    }
+    if (type === 'streetAddress') {
+      filters.i360__Customer_Street__c = { $like: `%${q}%` }
+    }
+  }
 
-  if (type === 'zip') {
-    filters.i360__Appointment_Zip__c = { $eq: q }
-  }
-  if (type === 'name') {
-    filters.Name = { $like: `%${q}%` }
-  }
-  if (type === 'city') {
-    filters.i360__Customer_City__c = { $like: `%${q}%` }
-  }
-  if (type === 'streetAddress') {
-    filters.i360__Customer_Street__c = { $like: `%${q}%` }
-  }
   if (year !== 'any') {
     let createdDate = SfDate.toDateTimeLiteral(new Date(year))
     filters.CreatedDate = {
@@ -62,6 +63,7 @@ export default async function Jobs(req, res) {
         'Latitude__c',
       ])
       .where(filters)
+      .execute({ autoFetch: true })
 
     res.json(projects)
   } catch (error) {

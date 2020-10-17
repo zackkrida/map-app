@@ -1,37 +1,18 @@
-import GoogleMap, { Maps } from 'google-map-react'
-import { scrollTo, getMapBoundsFromProjects } from 'lib/utils'
-import Link from 'next/link'
-import { useEffect, useState, useRef } from 'react'
-import { Logo } from '../components/Logo'
-import { ProjectListItem } from '../components/ProjectListItem'
-import { Marker, StatusColorBg, StatusColor, getMarkerColor } from './Marker'
 import { useLazyRequest } from 'lib/useLazyRequest'
+import { scrollTo } from 'lib/utils'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { Select } from './Select'
-import Dialog from '@reach/dialog'
+import React, { useEffect, useMemo, useState } from 'react'
 import { FixedSizeList as List } from 'react-window'
+import { Logo } from '../components/Logo'
+import { CustomMap } from './CustomMap'
+import { InfoModal } from './InfoModal'
+import { Row } from './Row'
+import { Select } from './Select'
 
-const Row = ({ index, data, style, children }) => {
-  const item = data[index]
-
-  return (
-    <div style={style}>
-      <ProjectListItem
-        onClick={() => item.setActiveItem(item.project.Id)}
-        project={item.project}
-        key={`legacy-${item.project.Id}`}
-        currentId={item.activeItem}
-      />
-      {children}
-    </div>
-  )
-}
-export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
-  const mapRef = useRef()
-  const mapsRef = useRef()
-
+export function Layout({ children }: LayoutProps) {
+  const listRef = React.createRef()
   const router = useRouter()
-
   const types = [
     { value: 'zip', name: 'Zip Code' },
     { value: 'city', name: 'City/Town' },
@@ -40,19 +21,10 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
     { value: 'productColor', name: 'Product Color' },
     { value: 'productType', name: 'Product Type' },
   ]
-
   const [searchCount, setSearchCount] = useState(0)
   const [q, setQ] = useState('')
   const [type, setType] = useState<any>(types[0])
   const [resultsLoading, setResultsLoading] = useState(false)
-
-  const today = new Date()
-  const years = Array(30)
-    .fill('')
-    .map((_, i) => ({
-      name: `${today.getFullYear() - i}`,
-      value: `${today.getFullYear() - i}`,
-    }))
 
   const [showFilters, setShowFilters] = useState(false)
   const [filters, setFilters] = useState({
@@ -61,73 +33,54 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
     jobType: 'any',
     productColor: 'any',
   })
+  const setFilter = (name: keyof typeof filters) => (value: string) =>
+    setFilters({ ...filters, [name]: value })
 
-  const { data: projects = [], fetchMore: fetchMoreProjects } = useLazyRequest(
-    `/api/project`,
-    {
-      q,
-      type: type.value,
+  const {
+    data: projects = [],
+    fetchMore: fetchMoreProjects,
+  } = useLazyRequest(`/api/project`, { q, type: type.value, ...filters })
+
+  function search() {
+    const searchParams = {
+      q: router?.query?.q || '',
+      type: router?.query?.type,
       ...filters,
     }
-  )
 
-  const {
-    data: legacyProjects = [],
-    fetchMore: fetchMoreLegacyProjects,
-  } = useLazyRequest('/api/legacy', { q, type: type.value, ...filters })
+    setSearchCount(searchCount + 1)
+    setQ((router.query?.q as string) || '')
+    setResultsLoading(true)
+    fetchMoreProjects(searchParams).then(_ => setResultsLoading(false))
+  }
 
-  const {
-    data: productColors = [],
-    fetchMore: fetchMoreProductColors,
-  } = useLazyRequest(`/api/product-colors`, {
-    type: filters.jobType === 'any' ? null : filters.jobType,
-  })
-
-  // Re-fit map whenever we get new projects
+  // Submit search whenver the page is mounted
   useEffect(() => {
-    if (projects.length === 0 || !mapRef.current) return
-    ;(mapRef.current as any).fitBounds(
-      getMapBoundsFromProjects(mapsRef.current, projects),
-      {
-        right: window.innerWidth > 700 ? 400 : 0,
-      }
+    search()
+  }, [])
+
+  const [activeItem, setActiveItem] = useState<string>(null)
+  useEffect(() => {
+    let activeClass = 'highlighted-list-item'
+    let activeStyleClasses = 'bg-blue-100 md:border md:border-blue-500 shadow-md hover:bg-blue-200 md:rounded-md'.split(
+      ' '
     )
-  }, [projects])
 
-  // load product colors whenever a product type is selected
-  useEffect(() => {
-    if ('jobType' in router.query) {
-      fetchMoreProductColors()
-    }
-  })
-
-  // Submit search whenver the page's url updates and contains a search param
-  useEffect(() => {
-    if ('q' in router.query) {
-      const searchParams = {
-        q: router.query.q,
-        type: router.query.type,
-        ...filters,
-      }
-
-      setSearchCount(searchCount + 1)
-      setQ(router.query.q as string)
-      setResultsLoading(true)
-
-      Promise.all([
-        fetchMoreProjects(searchParams),
-        fetchMoreLegacyProjects(searchParams),
-      ]).then(_ => {
-        setResultsLoading(false)
-      })
-    }
-  }, [router.query])
-
-  const [activeItem, setActiveItem] = useState(null)
-  useEffect(() => {
     if (!activeItem) return
-    scrollTo(`[data-index="${activeItem}"]`)
+
+    let oldHighlighted = document.querySelector(`.${activeClass}`)
+    oldHighlighted &&
+      oldHighlighted.classList.remove(activeClass, ...activeStyleClasses)
+
+    let selector = `[data-index="${activeItem}"]`
+    let el = document.querySelector(selector)
+    el.classList.add(activeClass, ...activeStyleClasses)
+    scrollTo(selector)
   }, [activeItem])
+
+  const projectItemData = useMemo(() => {
+    return projects.map(i => ({ project: i }))
+  }, [projects])
 
   function handleSubmit(event) {
     event.preventDefault()
@@ -145,10 +98,7 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
       }
     }
 
-    router.push({
-      pathname: router.pathname,
-      query,
-    })
+    router.push({ pathname: router.pathname, query }).then(() => search())
   }
 
   if (!projects) {
@@ -159,7 +109,6 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
     <div>
       {children && children}
 
-      {/* Map */}
       <div className="w-full h-screen flex flex-col md:flex-row items-stretch relative">
         <Link href="/">
           <a className="absolute left-0 right-0 w-40 mx-auto px-2 pt-1 pb-2 md:left-4 md:right-auto top-0 z-20 md:w-48 bg-white md:pb-2 md:px-4 md:pt-2 rounded-b-md shadow-md">
@@ -169,51 +118,11 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
 
         <div className="relative md:absolute w-full flex-grow md:h-screen">
           <div className="absolute h-full min-h-full w-full">
-            <GoogleMap
-              defaultCenter={mapPos}
-              defaultZoom={9.5}
-              options={{
-                fullscreenControl: false,
-                zoomControlOptions: { position: 4 },
-              }}
-              bootstrapURLKeys={{
-                key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
-              }}
-              yesIWantToUseGoogleMapApiInternals
-              onGoogleApiLoaded={({ map, maps }) => {
-                mapRef.current = map
-                mapsRef.current = maps
-              }}
-            >
-              {/* {projects.map(
-                i =>
-                  i.Latitude__c !== null && (
-                    <Marker
-                      active={i.Id === activeItem}
-                      onClick={() => setActiveItem(i.Id)}
-                      color={getMarkerColor(i)}
-                      key={i.Id}
-                      lat={Number(i.Latitude__c)}
-                      lng={Number(i.Long__c)}
-                    />
-                  )
-              )} */}
-
-              {legacyProjects.map(
-                i =>
-                  i.i360__Latitude__c !== null && (
-                    <Marker
-                      key={i.Id}
-                      active={i.Id === activeItem}
-                      color={StatusColor.Legacy}
-                      lat={i.i360__Latitude__c}
-                      lng={i.i360__Longitude__c}
-                      onClick={() => setActiveItem(i.Id)}
-                    />
-                  )
-              )}
-              {mapChildren}
-            </GoogleMap>
+            <CustomMap
+              projects={projects}
+              activeItem={activeItem}
+              setActiveItem={setActiveItem}
+            />
           </div>
         </div>
 
@@ -223,6 +132,7 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
             <form className="relative" onSubmit={handleSubmit}>
               <div className="mx-2 flex md:rounded-md shadow-sm relative rounded-none rounded-l-md transition duration-150 ease-in-out sm:text-sm sm:leading-5  text-brand-navy">
                 <input
+                  type="text"
                   value={q}
                   onChange={event => setQ(event.target.value)}
                   className="flex-1 block w-full form-input pr-28 placeholder-cool-gray-500"
@@ -252,8 +162,13 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
                 }`}
               >
                 <p className="text-xs md:text-sm">
-                  <strong>{projects.length + legacyProjects.length}</strong>{' '}
-                  Results
+                  {resultsLoading ? (
+                    'Loading Results'
+                  ) : (
+                    <>
+                      <strong>{projects.length}</strong> Results
+                    </>
+                  )}
                 </p>
 
                 <div className="flex items-center">
@@ -273,11 +188,21 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
                     >
                       <path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
                     </svg>
-                    {showFilters ? 'Hide Filters' : 'Filter Results'}
+                    {showFilters ? 'Hide Filters' : 'Filters'}
                   </button>
 
+                  {q && (
+                    <button
+                      type="button"
+                      className="bg-white bg-opacity-25 px-2 py-2 mr-2 rounded-md inline-flex border-white border border-opacity-0 items-center text-sm focus:outline-none focus:border-opacity-100 focus:shadow-md focus:bg-opacity-100 focus:text-brand-blue hover:border-opacity-100 hover:shadow-md hover:bg-opacity-100 hover:text-brand-blue transition-bg duration-100 ease-in-out"
+                      onClick={() => router.push('/').then(() => search())}
+                    >
+                      Reset
+                    </button>
+                  )}
+
                   <button
-                    disabled={q.length === 0 || resultsLoading}
+                    disabled={resultsLoading}
                     type="submit"
                     className="appearance-none inline-flex items-center px-2 py-2 rounded-md border border-l-0 border-blue-500 bg-brand-blue text-white text-sm active:bg-blue-500"
                   >
@@ -328,57 +253,7 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
                 </div>
               </div>
               {showFilters && (
-                <div className="px-2 py-4 top-full l-0 r-0 w-full bg-brand-gray">
-                  <div className="grid grid-cols-3 gap-2 grid-flow-row">
-                    <Select
-                      label="Created After"
-                      fallback="Any"
-                      options={years}
-                      value={filters.year}
-                      onChange={year => setFilters({ ...filters, year })}
-                    />
-                    <Select
-                      label="Status"
-                      fallback="Any"
-                      options={[
-                        { value: 'in-progress', name: 'In Progress' },
-                        { value: 'completed', name: 'Completed' },
-                      ]}
-                      value={filters.status}
-                      onChange={status => setFilters({ ...filters, status })}
-                    />
-                    <Select
-                      label="Job Type"
-                      fallback="Any"
-                      options={[
-                        { value: 'Roofing', name: 'Roofing' },
-                        { value: 'Siding', name: 'Siding' },
-                        { value: 'Doors', name: 'Doors' },
-                        { value: 'Windows', name: 'Windows' },
-                        { value: 'Warranty', name: 'Warranty' },
-                      ]}
-                      value={filters.jobType}
-                      onChange={jobType => setFilters({ ...filters, jobType })}
-                    />
-                    {['Roofing', 'Siding', 'Windows'].includes(
-                      filters.jobType
-                    ) && (
-                      <Select
-                        truncateItems={false}
-                        label="Product Color"
-                        fallback="Any"
-                        options={productColors.map(i => ({
-                          value: i,
-                          name: i,
-                        }))}
-                        value={filters.productColor}
-                        onChange={productColor =>
-                          setFilters({ ...filters, productColor })
-                        }
-                      />
-                    )}
-                  </div>
-                </div>
+                <Filters filters={filters} setFilter={setFilter} />
               )}
             </form>
           </div>
@@ -387,42 +262,15 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
             <div className="md:overflow-y-scroll md:flex-grow block">
               <ul className="flex md:block overflow-x-scroll md:overflow-auto">
                 <List
-                  height={(projects.length + legacyProjects.length) * 135}
-                  itemCount={projects.length + legacyProjects.length}
+                  ref={listRef}
+                  height={projects.length * 135}
+                  itemCount={projects.length}
                   itemSize={135}
                   width={'100%'}
-                  itemData={[
-                    ...projects.map(i => ({
-                      setActiveItem,
-                      project: i,
-                      activeItem,
-                    })),
-                    ...legacyProjects.map(i => ({
-                      setActiveItem,
-                      project: i,
-                      activeItem,
-                    })),
-                  ]}
+                  itemData={projectItemData}
                 >
                   {Row}
                 </List>
-
-                {/* {projects.map(project => (
-                  <ProjectListItem
-                    onClick={() => setActiveItem(project.Id)}
-                    project={project}
-                    key={project.Id}
-                    currentId={activeItem}
-                  />
-                ))}
-                {legacyProjects.map(project => (
-                  <ProjectListItem
-                    onClick={() => setActiveItem(project.Id)}
-                    project={project}
-                    key={`legacy-${project.Id}`}
-                    currentId={activeItem}
-                  />
-                ))} */}
               </ul>
             </div>
           )}
@@ -448,82 +296,83 @@ export function Layout({ mapPos, mapChildren, children }: LayoutProps) {
   )
 }
 
-function InfoModal() {
-  const [showInfoModal, setShowInfoModal] = useState(false)
+function Filters({
+  filters,
+  setFilter,
+}: {
+  filters: any
+  setFilter: (name) => (value) => void
+}) {
+  const router = useRouter()
+  const today = new Date()
+  const years = Array(30)
+    .fill('')
+    .map((_, i) => ({
+      name: `${today.getFullYear() - i}`,
+      value: `${today.getFullYear() - i}`,
+    }))
+
+  const {
+    data: productColors = [],
+    fetchMore: fetchMoreProductColors,
+  } = useLazyRequest(`/api/product-colors`, {
+    type: filters.jobType === 'any' ? null : filters.jobType,
+  })
+
+  // load product colors whenever a product type is selected
+  useEffect(() => {
+    if ('jobType' in router.query) {
+      fetchMoreProductColors()
+    }
+  })
 
   return (
-    <>
-      <button
-        onClick={() => setShowInfoModal(true)}
-        className="appearance-none rounded-full p-1 absolute left-2 bottom-2 bg-brand-blue hover:bg-blue-500 text-white w-8 h-8"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+    <div className="px-2 py-4 top-full l-0 r-0 w-full bg-brand-gray">
+      <div className="grid grid-cols-3 gap-2 grid-flow-row">
+        <Select
+          label="Created After"
+          fallback="Any"
+          options={years}
+          value={filters.year}
+          onChange={setFilter('year')}
+        />
+        <Select
+          label="Status"
+          fallback="Any"
+          options={[
+            { value: 'in-progress', name: 'In Progress' },
+            { value: 'completed', name: 'Completed' },
+          ]}
+          value={filters.status}
+          onChange={setFilter('status')}
+        />
+        <Select
+          label="Job Type"
+          fallback="Any"
+          options={[
+            { value: 'Roofing', name: 'Roofing' },
+            { value: 'Siding', name: 'Siding' },
+            { value: 'Doors', name: 'Doors' },
+            { value: 'Windows', name: 'Windows' },
+            { value: 'Warranty', name: 'Warranty' },
+          ]}
+          value={filters.jobType}
+          onChange={setFilter('jobType')}
+        />
+        {['Roofing', 'Siding', 'Windows'].includes(filters.jobType) && (
+          <Select
+            truncateItems={false}
+            label="Product Color"
+            fallback="Any"
+            options={productColors.map(i => ({
+              value: i,
+              name: i,
+            }))}
+            value={filters.productColor}
+            onChange={setFilter('productColor')}
           />
-        </svg>
-      </button>
-      <Dialog
-        isOpen={showInfoModal}
-        onDismiss={() => setShowInfoModal(false)}
-        className="info-modal"
-      >
-        <div className="text-center p-4 h-full flex flex-col justify-between items-center text-center flex-grow bg-white rounded shadow-md">
-          <div className="w-28 h-28 mx-auto mb-8 opacity-75">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 64 645"
-              className="w-full fill-current text-brand-navy mx-auto"
-            >
-              <path
-                fill="#6EA663"
-                d="M39.623 31.628H0v7.907h39.623v-7.907zM39.623 19.767H0v7.907h39.623v-7.907zM39.623 43.488H0v7.907h39.623v-7.907zM39.623 55.349H0v7.907h39.623v-7.907z"
-              ></path>
-              <path
-                fill="#5C8AE6"
-                d="M51.51 19.767h-7.925v19.768h7.924V19.768zM63.396 19.767h-7.924v19.768h7.924V19.768zM63.396 43.488h-7.924v19.768h7.924V43.488zM51.51 43.488h-7.925v19.768h7.924V43.488z"
-              ></path>
-              <path
-                fill="#738799"
-                d="M0 15.814h39.623L63.396 0H23.774L0 15.814z"
-              ></path>
-            </svg>
-          </div>
-          <p className="text-gray-400 uppercase text-sm font-semibold">
-            Welcome to the
-          </p>
-          <h1 className="text-lg md:text-2xl font-semibold">
-            Marshall Project Map
-          </h1>
-          <p className="mt-4">
-            Use the filters to search for ongoing and completed projects.
-          </p>
-
-          <h3 className="text-md font-bold mt-4">Marker Color Legend</h3>
-          <ul className="mt-4 text-sm">
-            {Object.entries(StatusColorBg).map(([key, value]) => (
-              <li
-                key={key}
-                className="flex justify-between items-center gap-2 pb-2"
-              >
-                <span
-                  className={`rounded-full block w-4 h-4 mr-4 border-opacity-75 border-2 ${value}`}
-                ></span>
-                {key}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </Dialog>
-    </>
+        )}
+      </div>
+    </div>
   )
 }

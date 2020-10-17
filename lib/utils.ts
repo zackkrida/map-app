@@ -1,3 +1,5 @@
+import { ProductColors } from 'types/colors'
+
 export const scrollTo = (selector: string) => {
   const $el = document.querySelector(selector)
   if ($el)
@@ -16,14 +18,6 @@ export const postFetcher = (url, data = {}) =>
     body: JSON.stringify(data),
     headers: { 'Content-Type': 'application/json' },
   }).then(res => res.json())
-
-export const ProductColors = {
-  Roofing: 'bg-brand-gray',
-  Siding: 'bg-brand-green',
-  Windows: 'bg-brand-blue',
-  Doors: 'bg-brand-orange',
-  Trim: 'bg-brand-navy',
-}
 
 export const getBrandColor = color => ProductColors[color] ?? 'bg-brand-orange'
 

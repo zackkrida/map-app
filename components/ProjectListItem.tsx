@@ -1,45 +1,29 @@
 import Link from 'next/link'
 import { getBrandColor, prettyDate } from 'lib/utils'
 
-export function ProjectListItem({
-  project,
-  currentId,
-  onClick,
-}: {
-  project: ProjectProps
-  currentId: string
-  onClick: () => void
-}) {
-  const isLegacy = 'Legacy_Sold_On_Date__c' in (project as any)
+export function ProjectListItem({ project }: { project: Project }) {
+  const isLegacy = project?.legacy
 
   let Wrapper = ({ children }) => (
     <div
-      onClick={onClick}
       style={{ height: '135px' }}
       data-index={project.Id}
-      className={`block hover:bg-blue-50 focus:outline-none focus:bg-blue-50 transition duration-150 ease-in-out border-r border-gray-100 flex flex-col justify-center md:border-b md:border-gray-50 w-80 md:w-full
-          ${
-            currentId === project.Id
-              ? ' bg-blue-100 md:border md:border-blue-500 shadow-md hover:bg-blue-200 md:rounded-md'
-              : ''
-          }
-        `}
+      className={`block hover:bg-blue-50 focus:outline-none focus:bg-blue-50 transition duration-150 ease-in-out border-r border-gray-100 flex flex-col justify-center md:border-b md:border-gray-50 w-80 md:w-full`}
     >
       {children}
     </div>
   )
+
   if (!isLegacy) {
     Wrapper = ({ children }) => (
-      <Link href={`/project/[id]`} as={`/project/${project.Id}`}>
+      <Link
+        href={`/project/[id]`}
+        as={`/project/${project.Id}`}
+        prefetch={false}
+      >
         <a
           data-index={project.Id}
-          className={`block hover:bg-blue-50 focus:outline-none focus:bg-blue-50 transition duration-150 ease-in-out border-r border-gray-100  md:border-b md:border-gray-50 w-80 md:w-full
-          ${
-            currentId === project.Id
-              ? ' bg-blue-100 md:border md:border-blue-500 shadow-md hover:bg-blue-200 md:rounded-md'
-              : ''
-          }
-        `}
+          className={`block hover:bg-blue-50 focus:outline-none focus:bg-blue-50 transition duration-150 ease-in-out border-r border-gray-100  md:border-b md:border-gray-50 w-80 md:w-full`}
         >
           {children}
         </a>

@@ -10,11 +10,6 @@ export default function ProjectPage() {
   const { id } = router.query
   const { data: project } = useSWR(`/api/project/${id}`, fetcher)
 
-  useEffect(() => {
-    router.prefetch('/')
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
   return (
     <Dialog aria-labelledby="projectTitle" onDismiss={() => router.push('/')}>
       <Project project={project} />

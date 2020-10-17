@@ -2,50 +2,7 @@ import { connectTo360 } from 'lib/three60'
 const { SfDate } = require('jsforce')
 
 export default async function Jobs(req, res) {
-  // const filters: any = {}
-  // const {
-  //   q = '',
-  //   type = 'zip',
-  //   year = 'any',
-  //   status = 'any',
-  //   jobType = 'any',
-  // } = req.body
-
-  // console.info({ type })
-
-  // if (type === 'zip') {
-  //   filters.i360__Appointment_Zip__c = { $eq: q }
-  // }
-  // if (type === 'name') {
-  //   filters.Name = { $like: `%${q}%` }
-  // }
-  // if (type === 'city') {
-  //   filters.i360__Customer_City__c = { $like: `%${q}%` }
-  // }
-  // if (type === 'streetAddress') {
-  //   filters.i360__Customer_Street__c = { $like: `%${q}%` }
-  // }
-  // if (year !== 'any') {
-  //   let createdDate = SfDate.toDateTimeLiteral(new Date(year))
-  //   filters.CreatedDate = {
-  //     $gt: createdDate,
-  //   }
-  // }
-  // if (status !== 'any') {
-  //   if (status === 'in-progress') {
-  //     filters.i360__Completed_On__c = { $eq: null }
-  //   } else {
-  //     filters.i360__Completed_On__c = { $ne: null }
-  //   }
-  // }
-
-  // if (jobType !== 'any') {
-  //   filters.i360__Job_Type_formatted__c = { $like: `%${jobType}%` }
-  // }
-
   try {
-    // console.info(filters)
-
     const t60 = await connectTo360()
     const legacyProjects = await t60
       .sobject('i360__Prospect__c')
@@ -66,7 +23,13 @@ export default async function Jobs(req, res) {
         // 'Latitude__c',
       ])
       .where({ Legacy_Sold_On_Date__c: { $ne: null } })
-    // .execute({ autoFetch: true })
+      .execute({ autoFetch: true })
+      .then(res =>
+        res.map(i => {
+          ;(i as any).legacy = true
+          return i
+        })
+      )
 
     res.json(legacyProjects)
   } catch (error) {
