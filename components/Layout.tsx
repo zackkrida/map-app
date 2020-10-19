@@ -1,17 +1,24 @@
 import { useLazyRequest } from 'lib/useLazyRequest'
-import { scrollTo } from 'lib/utils'
+// import { scrollTo } from 'lib/utils'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState, createRef } from 'react'
 import { FixedSizeList as List } from 'react-window'
 import { Logo } from '../components/Logo'
 import { CustomMap } from './CustomMap'
 import { InfoModal } from './InfoModal'
 import { Row } from './Row'
 import { Select } from './Select'
+import useDimensions from 'react-cool-dimensions'
 
 export function Layout({ children }: LayoutProps) {
-  const listRef = React.createRef()
+  const listRef = createRef()
+  const {
+    ref: listWrapperRef,
+    width: listWrapperWidth,
+    height: listWrapperHeight,
+  } = useDimensions<HTMLDivElement>({})
+
   const router = useRouter()
   const types = [
     { value: 'zip', name: 'Zip Code' },
@@ -41,6 +48,11 @@ export function Layout({ children }: LayoutProps) {
     fetchMore: fetchMoreProjects,
   } = useLazyRequest(`/api/project`, { q, type: type.value, ...filters })
 
+  // const {
+  //   data: legacyProjects = [],
+  //   fetchMore: fetchMoreLegacyProjects,
+  // } = useLazyRequest('/api/legacy', { q, type: type.value, ...filters })
+
   function search() {
     const searchParams = {
       q: router?.query?.q || '',
@@ -51,7 +63,13 @@ export function Layout({ children }: LayoutProps) {
     setSearchCount(searchCount + 1)
     setQ((router.query?.q as string) || '')
     setResultsLoading(true)
-    fetchMoreProjects(searchParams).then(_ => setResultsLoading(false))
+    // fetchMoreProjects(searchParams).then(_ => setResultsLoading(false))
+    Promise.all([
+      fetchMoreProjects(searchParams),
+      // fetchMoreLegacyProjects(searchParams),
+    ]).then(_ => {
+      setResultsLoading(false)
+    })
   }
 
   // Submit search whenver the page is mounted
@@ -73,14 +91,14 @@ export function Layout({ children }: LayoutProps) {
       oldHighlighted.classList.remove(activeClass, ...activeStyleClasses)
 
     let selector = `[data-index="${activeItem}"]`
-    let el = document.querySelector(selector)
-    el.classList.add(activeClass, ...activeStyleClasses)
-    scrollTo(selector)
-  }, [activeItem])
 
-  const projectItemData = useMemo(() => {
-    return projects.map(i => ({ project: i }))
-  }, [projects])
+    if (listRef.current) {
+      ;(listRef.current as any).scrollToItem(
+        projects.findIndex(i => i.Id === activeItem),
+        'center'
+      )
+    }
+  }, [activeItem])
 
   function handleSubmit(event) {
     event.preventDefault()
@@ -101,6 +119,12 @@ export function Layout({ children }: LayoutProps) {
     router.push({ pathname: router.pathname, query }).then(() => search())
   }
 
+  const isLarge = useMediaQuery('(min-width: 768px')
+
+  const projectItemData = useMemo(() => {
+    return projects.map(project => ({ project }))
+  }, [projects])
+
   if (!projects) {
     return <div>Loading...</div>
   }
@@ -119,6 +143,7 @@ export function Layout({ children }: LayoutProps) {
         <div className="relative md:absolute w-full flex-grow md:h-screen">
           <div className="absolute h-full min-h-full w-full">
             <CustomMap
+              // projects={[...projects, ...legacyProjects]}
               projects={projects}
               activeItem={activeItem}
               setActiveItem={setActiveItem}
@@ -258,22 +283,27 @@ export function Layout({ children }: LayoutProps) {
             </form>
           </div>
 
-          {projects.length > 0 && (
-            <div className="md:overflow-y-scroll md:flex-grow block">
+          <div
+            ref={listWrapperRef}
+            className="md:overflow-y-scroll md:flex-grow block"
+          >
+            {projects.length > 0 && (
               <ul className="flex md:block overflow-x-scroll md:overflow-auto">
                 <List
                   ref={listRef}
-                  height={projects.length * 135}
                   itemCount={projects.length}
-                  itemSize={135}
-                  width={'100%'}
+                  itemSize={isLarge ? 135 : 320}
+                  layout={isLarge ? 'vertical' : 'horizontal'}
                   itemData={projectItemData}
+                  width={listWrapperWidth}
+                  height={isLarge ? listWrapperHeight : 135}
                 >
                   {Row}
                 </List>
               </ul>
-            </div>
-          )}
+            )}
+          </div>
+
           {searchCount > 0 && projects.length === 0 && !resultsLoading && (
             <div className="text-center p-4 h-full flex flex-col justify-center items-center text-center flex-grow">
               <p className="mb-3">
@@ -375,4 +405,22 @@ function Filters({
       </div>
     </div>
   )
+}
+
+const useMediaQuery = mediaQuery => {
+  if (typeof window === 'undefined') return undefined
+  const [matches, setMatches] = useState(matchMedia(mediaQuery).matches)
+
+  useEffect(() => {
+    const mediaQueryList = matchMedia(mediaQuery)
+    const handle = () => setMatches(mediaQueryList.matches)
+    mediaQueryList.addListener(handle)
+    mediaQueryList.addEventListener('change', handle)
+    handle()
+    return () => {
+      mediaQueryList.removeListener(handle)
+    }
+  }, [mediaQuery])
+
+  return matches
 }

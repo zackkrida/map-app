@@ -21,6 +21,8 @@ interface Project {
   Latitude__c: string
 }
 
+interface LegacyProject extends Omit<Project, 'Long__c', 'Latitude__c'> {}
+
 interface BaseMarkerProps {
   lat: number
   lng: number

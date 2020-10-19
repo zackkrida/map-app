@@ -2,7 +2,6 @@ import Dialog from '@reach/dialog'
 import { Project } from 'components/Project'
 import { fetcher } from 'lib/utils'
 import { useRouter } from 'next/router'
-import { useEffect } from 'react'
 import useSWR from 'swr'
 
 export default function ProjectPage() {
