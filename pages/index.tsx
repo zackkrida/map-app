@@ -1,8 +1,5 @@
-// http://google-map-react.github.io/google-map-react/map/main/
-import { scrollTo } from 'lib/utils'
-import { useEffect, useState } from 'react'
-
-export default function IndexPage({ mapPos }) {
-  // Everything we need here on the index is in the shared layout
-  return <></>
+export default function IndexPage({}) {
+  // Everything we need here on the index is in the shared layout, since we *always*
+  // render the map in the background even on the single pages
+  return null
 }

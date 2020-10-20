@@ -8,6 +8,10 @@ export function Project({ project }) {
   const loading = typeof project === 'undefined'
 
   const show = value => (loading ? <Skeleton /> : value)
+  const hasProducts =
+    project?.Roofing_Product_Color__c ||
+    project?.Siding_Product_Color__c ||
+    project?.Trim_Color__c
 
   return (
     <div className="bg-white shadow overflow-hidden shadow-md sm:rounded-lg w-full relative">
@@ -119,50 +123,57 @@ export function Project({ project }) {
             <dt className="text-sm leading-5 font-medium text-gray-500 mb-4 md:mb-0">
               Products
             </dt>
-            <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
-              {(project?.Roofing_Product_Color__c ||
-                project?.Siding_Product_Color__c ||
-                project?.Trim_Color__c) && (
-                <ul className="border border-gray-200 rounded-md">
-                  {project?.Roofing_Product_Color__c && (
-                    <li className="pl-3 pr-4 py-3 flex items-center justify-between text-sm leading-5">
-                      <div className="w-0 flex-1 md:flex items-center">
-                        <h2 className="font-bold md:w-32 text-gray-500">
-                          Roofing Color
-                        </h2>
-                        <span className="md:ml-2 flex-1 w-0 truncate">
-                          {show(project?.Roofing_Product_Color__c)}
-                        </span>
-                      </div>
-                    </li>
-                  )}
-                  {project?.Siding_Product_Color__c && (
-                    <li className="pl-3 pr-4 py-3 flex items-center justify-between text-sm leading-5">
-                      <div className="w-0 flex-1 md:flex items-center">
-                        <h2 className="font-bold md:w-32 text-gray-500">
-                          Siding Color
-                        </h2>
-                        <span className="md:ml-2 flex-1 w-0 truncate">
-                          {show(project?.Siding_Product_Color__c)}
-                        </span>
-                      </div>
-                    </li>
-                  )}
-                  {project?.Trim_Color__c && (
-                    <li className="pl-3 pr-4 py-3 flex items-center justify-between text-sm leading-5">
-                      <div className="w-0 flex-1 md:flex items-center">
-                        <h2 className="font-bold md:w-32 text-gray-500">
-                          Windows Color
-                        </h2>
-                        <span className="md:ml-2 flex-1 w-0 truncate">
-                          {show(project?.Trim_Color__c)}
-                        </span>
-                      </div>
-                    </li>
-                  )}
-                </ul>
-              )}
-            </dd>
+            {loading ? (
+              <Skeleton />
+            ) : (
+              <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
+                {!hasProducts && (
+                  <p className="text-gray-500">
+                    No product information avaliable.
+                  </p>
+                )}
+                {hasProducts && (
+                  <ul className="border border-gray-200 rounded-md">
+                    {project?.Roofing_Product_Color__c && (
+                      <li className="pl-3 pr-4 py-3 flex items-center justify-between text-sm leading-5">
+                        <div className="w-0 flex-1 md:flex items-center">
+                          <h2 className="font-bold md:w-32 text-gray-500">
+                            Roofing Color
+                          </h2>
+                          <span className="md:ml-2 flex-1 w-0 truncate">
+                            {show(project?.Roofing_Product_Color__c)}
+                          </span>
+                        </div>
+                      </li>
+                    )}
+                    {project?.Siding_Product_Color__c && (
+                      <li className="pl-3 pr-4 py-3 flex items-center justify-between text-sm leading-5">
+                        <div className="w-0 flex-1 md:flex items-center">
+                          <h2 className="font-bold md:w-32 text-gray-500">
+                            Siding Color
+                          </h2>
+                          <span className="md:ml-2 flex-1 w-0 truncate">
+                            {show(project?.Siding_Product_Color__c)}
+                          </span>
+                        </div>
+                      </li>
+                    )}
+                    {project?.Trim_Color__c && (
+                      <li className="pl-3 pr-4 py-3 flex items-center justify-between text-sm leading-5">
+                        <div className="w-0 flex-1 md:flex items-center">
+                          <h2 className="font-bold md:w-32 text-gray-500">
+                            Windows Color
+                          </h2>
+                          <span className="md:ml-2 flex-1 w-0 truncate">
+                            {show(project?.Trim_Color__c)}
+                          </span>
+                        </div>
+                      </li>
+                    )}
+                  </ul>
+                )}
+              </dd>
+            )}
           </div>
         </dl>
       </div>

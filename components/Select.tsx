@@ -12,7 +12,7 @@ export function Select({
   options = [],
   value = '',
   truncateItems = true,
-  onChange,
+  onChange = (value: any) => {},
 }) {
   return (
     <div className="text-gray-700 space-y-1 custom-select w-full">

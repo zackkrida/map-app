@@ -1,11 +1,29 @@
 module.exports = {
   purge: {
-    enabled: process.env.NODE_ENV === 'production',
     content: [
       './pages/**/*.{js,jsx,ts,tsx}',
       './components/**/*.{js,jsx,ts,tsx}',
       './lib/**/*.{js,jsx,ts,tsx}',
+      './types/**/*.{js,jsx,ts,tsx}',
     ],
+    options: {
+      whitelist: [
+        'brand-orange',
+        'bg-brand-orange',
+        'brand-navy',
+        'bg-brand-navy',
+        'brand-gray',
+        'bg-brand-gray',
+        'brand-green',
+        'bg-brand-green',
+        'brand-blue',
+        'bg-brand-blue',
+      ],
+    },
+  },
+  future: {
+    removeDeprecatedGapUtilities: true,
+    purgeLayersByDefault: true,
   },
   theme: {
     extend: {

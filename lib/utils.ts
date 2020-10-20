@@ -1,3 +1,5 @@
+import { ProductColors } from 'types/colors'
+
 export const scrollTo = (selector: string) => {
   const $el = document.querySelector(selector)
   if ($el)
@@ -17,27 +19,25 @@ export const postFetcher = (url, data = {}) =>
     headers: { 'Content-Type': 'application/json' },
   }).then(res => res.json())
 
-export const ProductColors = {
-  Roofing: 'bg-brand-gray',
-  Siding: 'bg-brand-green',
-  Windows: 'bg-brand-blue',
-  Doors: 'bg-brand-orange',
-  Trim: 'bg-brand-navy',
-}
-
 export const getBrandColor = color => ProductColors[color] ?? 'bg-brand-orange'
 
 export const prettyDate = dateStr =>
   new Intl.DateTimeFormat('en-US').format(new Date(dateStr))
 
 // Return map bounds based on list of places
-export const getMapBoundsFromProjects = (maps, projects: any[]) => {
+export const getMapBoundsFromProjects = (maps, projects: Project[]) => {
   const bounds = new maps.LatLngBounds()
 
   projects.forEach(project => {
-    if (project.Latitude__c && project.Long__c) {
+    if (
+      project.i360__Appointment_Latitude__c &&
+      project.i360__Appointment_Longitude__c
+    ) {
       bounds.extend(
-        new maps.LatLng(Number(project.Latitude__c), Number(project.Long__c))
+        new maps.LatLng(
+          project.i360__Appointment_Latitude__c,
+          project.i360__Appointment_Longitude__c
+        )
       )
     }
   })
@@ -47,4 +47,17 @@ export const getMapBoundsFromProjects = (maps, projects: any[]) => {
 
 export function onlyUnique(value, index, self) {
   return self.indexOf(value) === index
+}
+
+const badObjEq = (one: {}) => (two: {}) =>
+  JSON.stringify(one) === JSON.stringify(two)
+
+export const badUnique = (arr: any[]) => {
+  const results = []
+  arr.map(item => {
+    if (!results.some(badObjEq(item))) {
+      results.push(item)
+    }
+  })
+  return results
 }
