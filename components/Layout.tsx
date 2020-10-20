@@ -82,8 +82,6 @@ export function Layout({ children }: LayoutProps) {
       i.name.toLowerCase().includes(q.toLowerCase())
     )
 
-    console.info({ newRes, q, productColors })
-
     setProductColorResults(newRes)
     console.log()
   }, [q, productColors])
@@ -142,7 +140,11 @@ export function Layout({ children }: LayoutProps) {
 
   function handleSubmit(event) {
     event.preventDefault()
-    search()
+    router.push(
+      { pathname: router.pathname, query: { q, type, ...filters } },
+      undefined,
+      { shallow: true }
+    )
   }
 
   if (!projects) {

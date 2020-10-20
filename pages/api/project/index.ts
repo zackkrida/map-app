@@ -59,8 +59,6 @@ export default async function Jobs(req, res) {
   // filters.i360__Appointment_Longitude__c = { $eq: null }
 
   try {
-    console.info(filters)
-
     const t60 = await connectTo360()
     const projects = await t60
       .sobject('i360__Project__c')
