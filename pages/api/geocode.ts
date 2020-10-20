@@ -58,4 +58,4 @@ export default async function Geocode(_, res) {
 }
 
 const buildAddressString = project =>
-  `${project.i360__Customer_Street__c}${project.i360__Customer_City__c}, ${project.i360__Customer_State__c} ${project.i360__Customer_Zip__c}`
+  `${project.i360__Appointment_Street__c}${project.i360__Appointment_City__c}, ${project.i360__Appointment_State__c} ${project.i360__Appointment_Zip__c}`

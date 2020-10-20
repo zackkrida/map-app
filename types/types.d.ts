@@ -16,6 +16,8 @@ interface Project {
   i360__Appointment_City__c: string
   i360__Appointment_State__c: string
   i360__Appointment_Zip__c: string
+  i360__Appointment_Latitude__c: number
+  i360__Appointment_Longitude__c: number
   i360__Job_Type__c: string
   Long__c: string
   Latitude__c: string

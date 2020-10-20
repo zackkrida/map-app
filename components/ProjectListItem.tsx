@@ -1,14 +1,30 @@
 import Link from 'next/link'
 import { getBrandColor, prettyDate } from 'lib/utils'
+import { ReactEventHandler } from 'react'
 
-export function ProjectListItem({ project }: { project: Project }) {
+export function ProjectListItem({
+  onClick,
+  activeItem,
+  project,
+}: {
+  onClick: ReactEventHandler<HTMLDivElement>
+  activeItem: string
+  project: Project
+}) {
   const isLegacy = project?.legacy
+  const isActive = activeItem === project.Id
+  const activeClass = `bg-blue-100 md:border md:border-blue-500 shadow-md hover:bg-blue-200 md:rounded-md`
+  let className = `block hover:bg-blue-50 focus:outline-none focus:bg-blue-50 transition duration-150 ease-in-out border-r border-gray-100 flex flex-col justify-center md:border-b md:border-gray-50 w-80 md:w-full`
+
+  if (isActive) {
+    className = `${className} ${activeClass}`
+  }
 
   let Wrapper = ({ children }) => (
     <div
       style={{ height: '135px' }}
       data-index={project.Id}
-      className={`block hover:bg-blue-50 focus:outline-none focus:bg-blue-50 transition duration-150 ease-in-out border-r border-gray-100 flex flex-col justify-center md:border-b md:border-gray-50 w-80 md:w-full`}
+      className={className}
     >
       {children}
     </div>
@@ -21,10 +37,7 @@ export function ProjectListItem({ project }: { project: Project }) {
         as={`/project/${project.Id}`}
         prefetch={false}
       >
-        <a
-          data-index={project.Id}
-          className={`block hover:bg-blue-50 focus:outline-none focus:bg-blue-50 transition duration-150 ease-in-out border-r border-gray-100  md:border-b md:border-gray-50 w-80 md:w-full`}
-        >
+        <a data-index={project.Id} className={className}>
           {children}
         </a>
       </Link>
@@ -33,7 +46,7 @@ export function ProjectListItem({ project }: { project: Project }) {
 
   return (
     <Wrapper>
-      <div className="flex items-center  px-2 md:px-4 py-4">
+      <div className="flex items-center px-2 md:px-4 py-4" onClick={onClick}>
         <div className="min-w-0 flex-1 flex items-center">
           {/* <div className="flex-shrink-0">
               <img

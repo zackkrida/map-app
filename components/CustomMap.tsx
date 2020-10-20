@@ -34,7 +34,10 @@ export function CustomMap({
         properties: { cluster: false, id: i.Id, color: getMarkerColor(i) },
         geometry: {
           type: 'Point',
-          coordinates: [parseFloat(i.Long__c), parseFloat(i.Latitude__c)],
+          coordinates: [
+            i.i360__Appointment_Longitude__c,
+            i.i360__Appointment_Latitude__c,
+          ],
         },
       })),
     [projects]
@@ -59,7 +62,7 @@ export function CustomMap({
     points,
     bounds,
     zoom,
-    options: { radius: 400, maxZoom: 14, minZoom: 9 },
+    options: { radius: 300, maxZoom: 14, minZoom: 9 },
   })
 
   return (
@@ -130,18 +133,24 @@ export function CustomMap({
  * a generally-acceptable, expected range for New England.
  */
 function validateLatLng(project: Project) {
-  if (!project.Long__c || !project.Latitude__c) return false
+  if (
+    !project.i360__Appointment_Latitude__c ||
+    !project.i360__Appointment_Longitude__c
+  )
+    return false
   const [lat, lng] = [
-    parseFloat(project.Latitude__c),
-    -1 * parseFloat(project.Long__c), // making the long positive because i couldn't figure out gt and lt with negative nums lol
+    project.i360__Appointment_Latitude__c,
+    project.i360__Appointment_Longitude__c,
   ]
   const latValid = lat > 40 && lat < 43
-  const lngValid = lng > 69 && lng < 72
+  const lngValid = lng < -69 && lng > -72
   const valid = latValid && lngValid
 
-  if (!valid)
+  if (!valid) {
     console.error(
       `Project ${project.Id} has an invalid lat/lng: ${lat} ${lng}.`
     )
+  }
+
   return valid
 }

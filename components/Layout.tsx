@@ -1,24 +1,14 @@
 import { useLazyRequest } from 'lib/useLazyRequest'
-// import { scrollTo } from 'lib/utils'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { useEffect, useMemo, useState, createRef } from 'react'
-import { FixedSizeList as List } from 'react-window'
+import React, { useEffect, useState } from 'react'
 import { Logo } from '../components/Logo'
 import { CustomMap } from './CustomMap'
 import { InfoModal } from './InfoModal'
-import { Row } from './Row'
 import { Select } from './Select'
-import useDimensions from 'react-cool-dimensions'
+import { ProjectList } from './ProjectList'
 
 export function Layout({ children }: LayoutProps) {
-  const listRef = createRef()
-  const {
-    ref: listWrapperRef,
-    width: listWrapperWidth,
-    height: listWrapperHeight,
-  } = useDimensions<HTMLDivElement>({})
-
   const router = useRouter()
   const types = [
     { value: 'zip', name: 'Zip Code' },
@@ -28,12 +18,12 @@ export function Layout({ children }: LayoutProps) {
     { value: 'productColor', name: 'Product Color' },
     { value: 'productType', name: 'Product Type' },
   ]
-  const [searchCount, setSearchCount] = useState(0)
   const [q, setQ] = useState('')
-  const [type, setType] = useState<any>(types[0])
-  const [resultsLoading, setResultsLoading] = useState(false)
-
   const [showFilters, setShowFilters] = useState(false)
+  const [type, setType] = useState<any>(types[0])
+  const [searchCount, setSearchCount] = useState(0)
+  const [resultsLoading, setResultsLoading] = useState(false)
+  const [activeItem, setActiveItem] = useState<string>(null)
   const [filters, setFilters] = useState({
     year: 'any',
     status: 'any',
@@ -42,11 +32,14 @@ export function Layout({ children }: LayoutProps) {
   })
   const setFilter = (name: keyof typeof filters) => (value: string) =>
     setFilters({ ...filters, [name]: value })
-
-  const {
-    data: projects = [],
-    fetchMore: fetchMoreProjects,
-  } = useLazyRequest(`/api/project`, { q, type: type.value, ...filters })
+  const { data: projects = [], fetchMore: fetchMoreProjects } = useLazyRequest(
+    `/api/project`,
+    {
+      q,
+      type: type.value,
+      ...filters,
+    }
+  )
 
   // const {
   //   data: legacyProjects = [],
@@ -77,29 +70,6 @@ export function Layout({ children }: LayoutProps) {
     search()
   }, [])
 
-  const [activeItem, setActiveItem] = useState<string>(null)
-  useEffect(() => {
-    let activeClass = 'highlighted-list-item'
-    let activeStyleClasses = 'bg-blue-100 md:border md:border-blue-500 shadow-md hover:bg-blue-200 md:rounded-md'.split(
-      ' '
-    )
-
-    if (!activeItem) return
-
-    let oldHighlighted = document.querySelector(`.${activeClass}`)
-    oldHighlighted &&
-      oldHighlighted.classList.remove(activeClass, ...activeStyleClasses)
-
-    let selector = `[data-index="${activeItem}"]`
-
-    if (listRef.current) {
-      ;(listRef.current as any).scrollToItem(
-        projects.findIndex(i => i.Id === activeItem),
-        'center'
-      )
-    }
-  }, [activeItem])
-
   function handleSubmit(event) {
     event.preventDefault()
 
@@ -119,12 +89,6 @@ export function Layout({ children }: LayoutProps) {
     router.push({ pathname: router.pathname, query }).then(() => search())
   }
 
-  const isLarge = useMediaQuery('(min-width: 768px')
-
-  const projectItemData = useMemo(() => {
-    return projects.map(project => ({ project }))
-  }, [projects])
-
   if (!projects) {
     return <div>Loading...</div>
   }
@@ -143,7 +107,6 @@ export function Layout({ children }: LayoutProps) {
         <div className="relative md:absolute w-full flex-grow md:h-screen">
           <div className="absolute h-full min-h-full w-full">
             <CustomMap
-              // projects={[...projects, ...legacyProjects]}
               projects={projects}
               activeItem={activeItem}
               setActiveItem={setActiveItem}
@@ -283,26 +246,11 @@ export function Layout({ children }: LayoutProps) {
             </form>
           </div>
 
-          <div
-            ref={listWrapperRef}
-            className="md:overflow-y-scroll md:flex-grow block"
-          >
-            {projects.length > 0 && (
-              <ul className="flex md:block overflow-x-scroll md:overflow-auto">
-                <List
-                  ref={listRef}
-                  itemCount={projects.length}
-                  itemSize={isLarge ? 135 : 320}
-                  layout={isLarge ? 'vertical' : 'horizontal'}
-                  itemData={projectItemData}
-                  width={listWrapperWidth}
-                  height={isLarge ? listWrapperHeight : 135}
-                >
-                  {Row}
-                </List>
-              </ul>
-            )}
-          </div>
+          <ProjectList
+            projects={projects}
+            activeItem={activeItem}
+            setActiveItem={setActiveItem}
+          />
 
           {searchCount > 0 && projects.length === 0 && !resultsLoading && (
             <div className="text-center p-4 h-full flex flex-col justify-center items-center text-center flex-grow">
@@ -405,22 +353,4 @@ function Filters({
       </div>
     </div>
   )
-}
-
-const useMediaQuery = mediaQuery => {
-  if (typeof window === 'undefined') return undefined
-  const [matches, setMatches] = useState(matchMedia(mediaQuery).matches)
-
-  useEffect(() => {
-    const mediaQueryList = matchMedia(mediaQuery)
-    const handle = () => setMatches(mediaQueryList.matches)
-    mediaQueryList.addListener(handle)
-    mediaQueryList.addEventListener('change', handle)
-    handle()
-    return () => {
-      mediaQueryList.removeListener(handle)
-    }
-  }, [mediaQuery])
-
-  return matches
 }

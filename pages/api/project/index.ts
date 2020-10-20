@@ -44,6 +44,12 @@ export default async function Jobs(req, res) {
     filters.i360__Job_Type_formatted__c = { $like: `%${jobType}%` }
   }
 
+  // filters.i360__Customer_State__c = { $nin: ['RI', 'MA', 'CT'] }
+  // filters.i360__Appointment_Latitude__c = { $gt: 40, $lt: 43 }
+  // filters.i360__Appointment_Longitude__c = { $lt: -69, $gt: -72 }
+  // filters.i360__Appointment_Latitude__c = { $eq: null }
+  // filters.i360__Appointment_Longitude__c = { $eq: null }
+
   try {
     console.info(filters)
 
@@ -52,11 +58,14 @@ export default async function Jobs(req, res) {
       .sobject('i360__Project__c')
       .select([
         'Id',
+        'i360__Customer_State__c',
         'i360__Correspondence_Name__c',
         'i360__Appointment_Address__c',
         'i360__Appointment_City__c',
         'i360__Appointment_State__c',
         'i360__Appointment_Zip__c',
+        'i360__Appointment_Latitude__c',
+        'i360__Appointment_Longitude__c',
         'i360__Completed_On__c',
         'i360__Job_Type__c',
         'Long__c',
