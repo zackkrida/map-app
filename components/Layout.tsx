@@ -28,27 +28,29 @@ export function Layout({ children }: LayoutProps) {
     { value: 'productColor', name: 'Product Color' },
     { value: 'productType', name: 'Product Type' },
   ]
-  const [q, setQ] = useState('')
-  const [showFilters, setShowFilters] = useState(false)
-  const [type, setType] = useState<typeof types[0]>(types[0])
-  const [searchCount, setSearchCount] = useState(0)
-  const [resultsLoading, setResultsLoading] = useState(false)
-  const [activeItem, setActiveItem] = useState<string>(null)
-  const [filters, setFilters] = useState({
+  const baseFilters = {
     year: 'any',
     status: 'any',
     jobType: 'any',
     productColor: 'any',
-  })
+  }
+  const [q, setQ] = useState('')
+  const [showFilters, setShowFilters] = useState(false)
+  const [type, setType] = useState<string>(types[0].value)
+  const [searchCount, setSearchCount] = useState(0)
+  const [resultsLoading, setResultsLoading] = useState(false)
+  const [activeItem, setActiveItem] = useState<string>(null)
+  const [filters, setFilters] = useState(baseFilters)
   const [productColorResults, setProductColorResults] = useState([])
 
   const setFilter = (name: keyof typeof filters) => (value: string) =>
     setFilters({ ...filters, [name]: value })
+
   const { data: projects = [], fetchMore: fetchMoreProjects } = useLazyRequest(
     `/api/project`,
     {
       q,
-      type: type.value,
+      type,
       ...filters,
     }
   )
@@ -91,12 +93,18 @@ export function Layout({ children }: LayoutProps) {
   //   fetchMore: fetchMoreLegacyProjects,
   // } = useLazyRequest('/api/legacy', { q, type: type.value, ...filters })
 
-  function search() {
+  function search(
+    { newQ = q, newType = type, newFilters = filters } = {
+      newQ: q,
+      newType: type,
+      newFilters: filters,
+    }
+  ) {
     setSearchCount(searchCount + 1)
     setResultsLoading(true)
     // fetchMoreProjects(searchParams).then(_ => setResultsLoading(false))
     return Promise.all([
-      fetchMoreProjects(),
+      fetchMoreProjects({ q: newQ, type: newType, ...newFilters }),
       fetchMoreProductColors(),
       // fetchMoreLegacyProjects(searchParams),
     ]).then(_ => {
@@ -104,29 +112,37 @@ export function Layout({ children }: LayoutProps) {
     })
   }
 
+  function reset() {
+    let newQ = ''
+    let newType = types[0].value
+    let newFilters = baseFilters
+
+    setQ(newQ)
+    setType(newType)
+    setFilters(newFilters)
+    search({ newQ, newFilters, newType })
+  }
+
   // Submit search whenver the page is mounted
   useEffect(() => {
-    setQ((router.query?.q as string) || '')
-    search()
-  }, [])
-
-  function handleSubmit(event) {
-    event.preventDefault()
-
-    let query = {
-      ...router.query,
-      q,
-      type: type.value,
-    }
-
-    // Add non-'any' filters to the search
-    for (const [filterName, filterValue] of Object.entries(filters)) {
-      if (filterValue !== 'any') {
-        query[filterName] = filterValue
+    let newQ = (router.query?.q as string) || ''
+    let newFilters = filters
+    let newType = (router.query.type as string) || type
+    for (const filter of Object.keys(filters)) {
+      if (router.query[filter]) {
+        newFilters[filter] = router.query[filter]
       }
     }
 
-    router.push({ pathname: router.pathname, query }).then(() => search())
+    search({ newQ, newFilters, newType })
+    setQ(newQ)
+    setType(newType)
+    setFilters(newFilters)
+  }, [router.query])
+
+  function handleSubmit(event) {
+    event.preventDefault()
+    search()
   }
 
   if (!projects) {
@@ -175,9 +191,9 @@ export function Layout({ children }: LayoutProps) {
                   <div className="absolute inset-y-0 right-0 flex items-center">
                     <select
                       aria-label="Search Type"
-                      value={type.value}
+                      value={type}
                       onChange={event => {
-                        setType(types.find(i => i.value === event.target.value))
+                        setType(event.target.value)
                       }}
                       className="form-select h-full py-0 pl-2 pr-7 border-transparent bg-transparent text-gray-500 sm:text-sm sm:leading-5 rounded-r-md rounded-l-none bg-blue-100 border-l border-blue-200"
                     >
@@ -225,18 +241,18 @@ export function Layout({ children }: LayoutProps) {
                       {showFilters ? 'Hide Filters' : 'Filters'}
                     </button>
 
-                    {q &&
-                      Object.entries(filters).some(
+                    {q !== '' ||
+                      (Object.entries(filters).some(
                         ([i, value]) => value !== 'any'
                       ) && (
                         <button
                           type="button"
                           className="bg-white bg-opacity-25 px-2 py-2 mr-2 rounded-md inline-flex border-white border border-opacity-0 items-center text-sm focus:outline-none focus:border-opacity-100 focus:shadow-md focus:bg-opacity-100 focus:text-brand-blue hover:border-opacity-100 hover:shadow-md hover:bg-opacity-100 hover:text-brand-blue transition-bg duration-100 ease-in-out"
-                          onClick={() => router.push('/').then(() => search())}
+                          onClick={reset}
                         >
                           Reset
                         </button>
-                      )}
+                      ))}
 
                     <button
                       disabled={resultsLoading}
@@ -289,7 +305,7 @@ export function Layout({ children }: LayoutProps) {
                     </button>
                   </div>
 
-                  {type.value === 'productColor' && (
+                  {type === 'productColor' && (
                     <ComboboxPopover className="absolute top-2 z-20 w-full left-0 right-0">
                       {/* <div className="rounded-md bg-white shadow-lg mx-2"> */}
                       <ComboboxList className="max-h-60 rounded-md py-1 text-base leading-6 shadow-xs overflow-auto focus:outline-none sm:text-sm sm:leading-5">
@@ -416,19 +432,6 @@ function Filters({
           value={filters.jobType}
           onChange={setFilter('jobType')}
         />
-        {/* {['Roofing', 'Siding', 'Windows'].includes(filters.jobType) && (
-          <Select
-            truncateItems={false}
-            label="Product Color"
-            fallback="Any"
-            options={productColors.map(i => ({
-              value: i,
-              name: i,
-            }))}
-            value={filters.productColor}
-            onChange={setFilter('productColor')}
-          />
-        )} */}
       </div>
     </div>
   )

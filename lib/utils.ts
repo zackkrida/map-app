@@ -25,7 +25,7 @@ export const prettyDate = dateStr =>
   new Intl.DateTimeFormat('en-US').format(new Date(dateStr))
 
 // Return map bounds based on list of places
-export const getMapBoundsFromProjects = (maps, projects: any[]) => {
+export const getMapBoundsFromProjects = (maps, projects: Project[]) => {
   const bounds = new maps.LatLngBounds()
 
   projects.forEach(project => {

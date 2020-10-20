@@ -46,13 +46,16 @@ export function CustomMap({
   // Re-fit map whenever we get new projects
   useEffect(() => {
     if (projects.length === 0 || !mapRef.current) return
-    ;(mapRef.current as any).fitBounds(
+    mapRef.current.fitBounds(
       getMapBoundsFromProjects(
         mapsRef.current,
         projects.filter(validateLatLng)
       ),
       {
-        right: window.innerWidth > 700 ? 400 : 0,
+        left: 40,
+        right: window.innerWidth > 700 ? 440 : 40,
+        top: 40,
+        bottom: 40,
       }
     )
   }, [projects])
