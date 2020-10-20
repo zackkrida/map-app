@@ -143,7 +143,7 @@ function validateLatLng(project: Project) {
     project.i360__Appointment_Longitude__c,
   ]
   const latValid = lat > 40 && lat < 43
-  const lngValid = lng < -69 && lng > -72
+  const lngValid = lng < -69 && lng > -75
   const valid = latValid && lngValid
 
   if (!valid) {

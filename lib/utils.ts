@@ -48,3 +48,16 @@ export const getMapBoundsFromProjects = (maps, projects: any[]) => {
 export function onlyUnique(value, index, self) {
   return self.indexOf(value) === index
 }
+
+const badObjEq = (one: {}) => (two: {}) =>
+  JSON.stringify(one) === JSON.stringify(two)
+
+export const badUnique = (arr: any[]) => {
+  const results = []
+  arr.map(item => {
+    if (!results.some(badObjEq(item))) {
+      results.push(item)
+    }
+  })
+  return results
+}

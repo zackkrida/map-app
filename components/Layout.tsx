@@ -7,6 +7,8 @@ import { CustomMap } from './CustomMap'
 import { InfoModal } from './InfoModal'
 import { Select } from './Select'
 import { ProjectList } from './ProjectList'
+import { ProductColors } from 'types/colors'
+import { badUnique } from 'lib/utils'
 
 export function Layout({ children }: LayoutProps) {
   const router = useRouter()
@@ -20,7 +22,7 @@ export function Layout({ children }: LayoutProps) {
   ]
   const [q, setQ] = useState('')
   const [showFilters, setShowFilters] = useState(false)
-  const [type, setType] = useState<any>(types[0])
+  const [type, setType] = useState<typeof types[0]>(types[0])
   const [searchCount, setSearchCount] = useState(0)
   const [resultsLoading, setResultsLoading] = useState(false)
   const [activeItem, setActiveItem] = useState<string>(null)
@@ -41,24 +43,33 @@ export function Layout({ children }: LayoutProps) {
     }
   )
 
+  const [productColors, setProductColors] = useState([])
+  const {
+    data: rawProdColors = [],
+    fetchMore: fetchMoreProductColors,
+  } = useLazyRequest(`/api/product-colors`, {})
+
+  useEffect(() => {
+    if (rawProdColors.length > 0) {
+      const gottem = badUnique(rawProdColors)
+      console.info({ gottem })
+      setProductColors(gottem)
+    }
+  }, [rawProdColors])
+
   // const {
   //   data: legacyProjects = [],
   //   fetchMore: fetchMoreLegacyProjects,
   // } = useLazyRequest('/api/legacy', { q, type: type.value, ...filters })
 
   function search() {
-    const searchParams = {
-      q: router?.query?.q || '',
-      type: router?.query?.type,
-      ...filters,
-    }
-
     setSearchCount(searchCount + 1)
     setQ((router.query?.q as string) || '')
     setResultsLoading(true)
     // fetchMoreProjects(searchParams).then(_ => setResultsLoading(false))
-    Promise.all([
-      fetchMoreProjects(searchParams),
+    return Promise.all([
+      fetchMoreProjects(router.query),
+      fetchMoreProductColors(),
       // fetchMoreLegacyProjects(searchParams),
     ]).then(_ => {
       setResultsLoading(false)
@@ -179,15 +190,18 @@ export function Layout({ children }: LayoutProps) {
                     {showFilters ? 'Hide Filters' : 'Filters'}
                   </button>
 
-                  {q && (
-                    <button
-                      type="button"
-                      className="bg-white bg-opacity-25 px-2 py-2 mr-2 rounded-md inline-flex border-white border border-opacity-0 items-center text-sm focus:outline-none focus:border-opacity-100 focus:shadow-md focus:bg-opacity-100 focus:text-brand-blue hover:border-opacity-100 hover:shadow-md hover:bg-opacity-100 hover:text-brand-blue transition-bg duration-100 ease-in-out"
-                      onClick={() => router.push('/').then(() => search())}
-                    >
-                      Reset
-                    </button>
-                  )}
+                  {q ||
+                    (Object.entries(filters).some(
+                      ([i, value]) => value !== 'any'
+                    ) && (
+                      <button
+                        type="button"
+                        className="bg-white bg-opacity-25 px-2 py-2 mr-2 rounded-md inline-flex border-white border border-opacity-0 items-center text-sm focus:outline-none focus:border-opacity-100 focus:shadow-md focus:bg-opacity-100 focus:text-brand-blue hover:border-opacity-100 hover:shadow-md hover:bg-opacity-100 hover:text-brand-blue transition-bg duration-100 ease-in-out"
+                        onClick={() => router.push('/').then(() => search())}
+                      >
+                        Reset
+                      </button>
+                    ))}
 
                   <button
                     disabled={resultsLoading}
@@ -239,6 +253,75 @@ export function Layout({ children }: LayoutProps) {
                     )}
                   </button>
                 </div>
+
+                {type.value === 'productColor' && (
+                  <>
+                    <div>{productColors.length}</div>
+                    <div className="absolute mt-1 w-full rounded-md bg-white shadow-lg">
+                      <ul
+                        tabIndex={-1}
+                        role="listbox"
+                        aria-labelledby="listbox-label"
+                        aria-activedescendant="listbox-item-3"
+                        className="max-h-60 rounded-md py-1 text-base leading-6 shadow-xs overflow-auto focus:outline-none sm:text-sm sm:leading-5"
+                      >
+                        {/* <!--
+          Select option, manage highlight styles based on mouseenter/mouseleave and keyboard navigation.
+
+          Highlighted: "text-white bg-indigo-600", Not Highlighted: "text-gray-900"
+        --> */}
+
+                        {productColors
+                          .sort((a: { name: string }, b: { name: string }) =>
+                            a.name.localeCompare(b.name)
+                          )
+                          .map(i => (
+                            <div>
+                              <li
+                                id="listbox-item-0"
+                                role="option"
+                                className="text-gray-900 cursor-default select-none relative py-2 pl-3 pr-9"
+                              >
+                                <div className="flex">
+                                  {/* <!-- Selected: "font-semibold", Not Selected: "font-normal" --> */}
+                                  <span className="font-normal truncate">
+                                    {i.name}
+                                  </span>
+                                  {/* <!-- Highlighted: "text-indigo-200", Not Highlighted: "text-gray-500" --> */}
+                                  <span className="text-gray-500 truncate ml-auto">
+                                    {i.type}
+                                  </span>
+                                </div>
+
+                                {/* <!--
+            Checkmark, only display for selected option.
+
+            Highlighted: "text-white", Not Highlighted: "text-indigo-600"
+          --> */}
+                                <span className="absolute inset-y-0 right-0 flex items-center pr-4">
+                                  {/* <!-- Heroicon name: check --> */}
+                                  <svg
+                                    className="h-5 w-5"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                      clip-rule="evenodd"
+                                    />
+                                  </svg>
+                                </span>
+                              </li>{' '}
+                            </div>
+                          ))}
+
+                        {/* <!-- More options... --> */}
+                      </ul>
+                    </div>
+                  </>
+                )}
               </div>
               {showFilters && (
                 <Filters filters={filters} setFilter={setFilter} />
@@ -290,20 +373,6 @@ function Filters({
       value: `${today.getFullYear() - i}`,
     }))
 
-  const {
-    data: productColors = [],
-    fetchMore: fetchMoreProductColors,
-  } = useLazyRequest(`/api/product-colors`, {
-    type: filters.jobType === 'any' ? null : filters.jobType,
-  })
-
-  // load product colors whenever a product type is selected
-  useEffect(() => {
-    if ('jobType' in router.query) {
-      fetchMoreProductColors()
-    }
-  })
-
   return (
     <div className="px-2 py-4 top-full l-0 r-0 w-full bg-brand-gray">
       <div className="grid grid-cols-3 gap-2 grid-flow-row">
@@ -337,7 +406,7 @@ function Filters({
           value={filters.jobType}
           onChange={setFilter('jobType')}
         />
-        {['Roofing', 'Siding', 'Windows'].includes(filters.jobType) && (
+        {/* {['Roofing', 'Siding', 'Windows'].includes(filters.jobType) && (
           <Select
             truncateItems={false}
             label="Product Color"
@@ -349,7 +418,7 @@ function Filters({
             value={filters.productColor}
             onChange={setFilter('productColor')}
           />
-        )}
+        )} */}
       </div>
     </div>
   )
