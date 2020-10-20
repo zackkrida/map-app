@@ -1268,6 +1268,20 @@
     "@reach/utils" "0.11.2"
     tslib "^2.0.0"
 
+"@reach/combobox@^0.11.2":
+  version "0.11.2"
+  resolved "https://registry.yarnpkg.com/@reach/combobox/-/combobox-0.11.2.tgz#f94c6ba2a4abe64c8e44841b54ab5516edb21752"
+  integrity sha512-dqb55eJZTcylJBjnr7fgHdEtb1OvbSGHQHHWIGnQldUZyau0t0oWJ+EFNmhXXrLbl1nIeJ9wp/EPNnrY2uyXmg==
+  dependencies:
+    "@reach/auto-id" "0.11.2"
+    "@reach/descendants" "0.11.2"
+    "@reach/popover" "0.11.2"
+    "@reach/portal" "0.11.2"
+    "@reach/utils" "0.11.2"
+    highlight-words-core "1.2.2"
+    prop-types "^15.7.2"
+    tslib "^2.0.0"
+
 "@reach/descendants@0.11.2":
   version "0.11.2"
   resolved "https://registry.yarnpkg.com/@reach/descendants/-/descendants-0.11.2.tgz#49ea1b5eb91aba8ae6dce57f6575c38aff1f9756"
@@ -3844,6 +3858,11 @@ hex-rgb@^4.1.0:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/hex-rgb/-/hex-rgb-4.2.0.tgz#fb377f2e5658fc924f1efa189685922e56ecaf0f"
   integrity sha512-I7DkKeQ2kR2uyqgbxPgNgClH/rfs1ioKZhZW8VTIAirsxCR5EyhYeywgZbhMScgUbKCkgo6bb6JwA0CLTn9beA==
+
+highlight-words-core@1.2.2:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/highlight-words-core/-/highlight-words-core-1.2.2.tgz#1eff6d7d9f0a22f155042a00791237791b1eeaaa"
+  integrity sha512-BXUKIkUuh6cmmxzi5OIbUJxrG8OAk2MqoL1DtO3Wo9D2faJg2ph5ntyuQeLqaHJmzER6H5tllCDA9ZnNe9BVGg==
 
 hmac-drbg@^1.0.0:
   version "1.0.1"

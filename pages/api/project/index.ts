@@ -24,6 +24,14 @@ export default async function Jobs(req, res) {
     if (type === 'streetAddress') {
       filters.i360__Customer_Street__c = { $like: `%${q}%` }
     }
+
+    if (type === 'productColor') {
+      filters.$or = [
+        { Roofing_Product_Color__c: { $like: `%${q}%` } },
+        { Siding_Product_Color__c: { $like: `%${q}%` } },
+        { Trim_Color__c: { $like: `%${q}%` } },
+      ]
+    }
   }
 
   if (year !== 'any') {

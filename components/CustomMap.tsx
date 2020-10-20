@@ -14,7 +14,7 @@ const mapSettings = {
 }
 
 export function CustomMap({
-  projects,
+  projects = [],
   activeItem,
   setActiveItem,
 }: {
