@@ -51,7 +51,7 @@ export function ProjectList({
 }
 
 interface ProjectListProps {
-  projects: Project[]
+  projects: ProjectResultList
   activeItem: string | undefined
   setActiveItem: (ProjectId: Project['Id']) => void
 }

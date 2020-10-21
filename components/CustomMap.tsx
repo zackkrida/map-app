@@ -18,7 +18,7 @@ export function CustomMap({
   activeItem,
   setActiveItem,
 }: {
-  projects: Project[]
+  projects: ProjectResultList
   activeItem: string
   setActiveItem: (value: string) => void
 }) {
@@ -35,8 +35,12 @@ export function CustomMap({
         geometry: {
           type: 'Point',
           coordinates: [
-            i.i360__Appointment_Longitude__c,
-            i.i360__Appointment_Latitude__c,
+            i.legacy === true
+              ? i.i360__Longitude__c
+              : i.i360__Appointment_Longitude__c,
+            i.legacy === true
+              ? i.i360__Latitude__c
+              : i.i360__Appointment_Latitude__c,
           ],
         },
       })),
@@ -65,7 +69,7 @@ export function CustomMap({
     points,
     bounds,
     zoom,
-    options: { radius: 300, maxZoom: 14, minZoom: 9 },
+    options: { radius: 300, maxZoom: 16, minZoom: 9 },
   })
 
   return (
@@ -135,15 +139,23 @@ export function CustomMap({
  * Sloppy, but make sure our Lat and Lng fall into
  * a generally-acceptable, expected range for New England.
  */
-function validateLatLng(project: Project) {
+function validateLatLng(project: Project | LegacyProject) {
   if (
-    !project.i360__Appointment_Latitude__c ||
-    !project.i360__Appointment_Longitude__c
-  )
+    project.legacy === true
+      ? !project.i360__Latitude__c || !project.i360__Longitude__c
+      : !project.i360__Appointment_Latitude__c ||
+        !project.i360__Appointment_Longitude__c
+  ) {
     return false
+  }
+
   const [lat, lng] = [
-    project.i360__Appointment_Latitude__c,
-    project.i360__Appointment_Longitude__c,
+    project.legacy === true
+      ? project.i360__Latitude__c
+      : project.i360__Appointment_Latitude__c,
+    project.legacy === true
+      ? project.i360__Longitude__c
+      : project.i360__Appointment_Longitude__c,
   ]
   const latValid = lat > 40 && lat < 43
   const lngValid = lng < -69 && lng > -74

@@ -35,7 +35,11 @@ export function Marker({
   )
 }
 
-export const getMarkerColor = (project: Project) => {
-  if (project.i360__Completed_On__c !== null) return StatusColor.Completed
-  if (project.i360__Completed_On__c === null) return StatusColor.Progress
+export const getMarkerColor = (project: Project | LegacyProject) => {
+  if (project.legacy === true) {
+    return StatusColor.Legacy
+  } else {
+    if (project.i360__Completed_On__c !== null) return StatusColor.Completed
+    if (project.i360__Completed_On__c === null) return StatusColor.Progress
+  }
 }

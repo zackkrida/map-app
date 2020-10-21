@@ -9,7 +9,7 @@ interface LocationCoordinates {
 
 interface Project {
   Id: string
-  legacy?: boolean
+  legacy: false
   i360__Completed_On__c: string
   i360__Correspondence_Name__c: string
   i360__Appointment_Address__c: string
@@ -23,13 +23,22 @@ interface Project {
   Latitude__c: string
 }
 
-interface LegacyProject extends Omit<Project, 'Long__c', 'Latitude__c'> {}
+interface LegacyProject {
+  legacy: true
+  Id: string
+  i360__Correspondence_Name__c: string
+  i360__Longitude__c: number
+  i360__Latitude__c: number
+  Legacy_Sold_On_Date__c: string
+}
 
 interface BaseMarkerProps {
   lat: number
   lng: number
   children: JSX.Element
 }
+
+type ProjectResultList = (Project | LegacyProject)[]
 
 interface CustomMarkerProps extends BaseMarkerProps {
   active: boolean

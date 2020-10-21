@@ -25,18 +25,24 @@ export const prettyDate = dateStr =>
   new Intl.DateTimeFormat('en-US').format(new Date(dateStr))
 
 // Return map bounds based on list of places
-export const getMapBoundsFromProjects = (maps, projects: Project[]) => {
+export const getMapBoundsFromProjects = (maps, projects: ProjectResultList) => {
   const bounds = new maps.LatLngBounds()
 
   projects.forEach(project => {
     if (
-      project.i360__Appointment_Latitude__c &&
-      project.i360__Appointment_Longitude__c
+      project.legacy === true
+        ? project.i360__Latitude__c && project.i360__Longitude__c
+        : project.i360__Appointment_Latitude__c &&
+          project.i360__Appointment_Longitude__c
     ) {
       bounds.extend(
         new maps.LatLng(
-          project.i360__Appointment_Latitude__c,
-          project.i360__Appointment_Longitude__c
+          project.legacy === true
+            ? project.i360__Latitude__c
+            : project.i360__Appointment_Latitude__c,
+          project.legacy === true
+            ? project.i360__Longitude__c
+            : project.i360__Appointment_Longitude__c
         )
       )
     }

@@ -218,7 +218,10 @@ export function Layout({ children }: LayoutProps) {
                       'Loading Results'
                     ) : (
                       <>
-                        <strong>{projects.length}</strong> Results
+                        <strong>
+                          {new Intl.NumberFormat().format(projects.length)}
+                        </strong>{' '}
+                        Results
                       </>
                     )}
                   </p>
@@ -417,6 +420,7 @@ function Filters({
           options={[
             { value: 'in-progress', name: 'In Progress' },
             { value: 'completed', name: 'Completed' },
+            { value: 'legacy', name: 'Legacy' },
           ]}
           value={filters.status}
           onChange={setFilter('status')}

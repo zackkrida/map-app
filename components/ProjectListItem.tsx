@@ -9,9 +9,9 @@ export function ProjectListItem({
 }: {
   onClick: ReactEventHandler<HTMLDivElement>
   activeItem: string
-  project: Project
+  project: Project | LegacyProject
 }) {
-  const isLegacy = project?.legacy
+  const isLegacy = project.legacy === true
   const isActive = activeItem === project.Id
   const activeClass = `bg-blue-100 md:border md:border-blue-500 shadow-md hover:bg-blue-200 md:rounded-md`
   let className = `block hover:bg-blue-50 focus:outline-none focus:bg-blue-50 transition duration-150 ease-in-out border-r border-gray-100 flex flex-col justify-center md:border-b md:border-gray-50 w-80 md:w-full`
@@ -111,22 +111,26 @@ export function ProjectListItem({
               </div>
             </div>
 
-            {isLegacy && (
+            {project.legacy === true && (
               <div className="text-sm text-gray-400">
-                <p>Legacy Project</p>
+                <p>
+                  Legacy Project: {prettyDate(project.Legacy_Sold_On_Date__c)}
+                </p>
               </div>
             )}
 
-            <div className="flex text-xs capitalize text-white mt-2 justify-start">
-              {project?.i360__Job_Type__c?.split(';')?.map(i => (
-                <div
-                  key={`${project.Id}-${i}`}
-                  className={`mr-1 ${getBrandColor(i)} px-2 rounded-md`}
-                >
-                  {i}
-                </div>
-              ))}
-            </div>
+            {project.legacy === false && (
+              <div className="flex text-xs capitalize text-white mt-2 justify-start">
+                {project?.i360__Job_Type__c?.split(';')?.map(i => (
+                  <div
+                    key={`${project.Id}-${i}`}
+                    className={`mr-1 ${getBrandColor(i)} px-2 rounded-md`}
+                  >
+                    {i}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
         <div className="hidden md:block">
