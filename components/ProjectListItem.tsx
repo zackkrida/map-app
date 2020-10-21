@@ -61,27 +61,28 @@ export function ProjectListItem({
                 {project.i360__Correspondence_Name__c}
               </div>
               <div className="flex flex-col">
-                {project.i360__Appointment_Address__c && (
-                  <div className="mt-2 flex items-center text-sm leading-5 text-gray-500">
-                    <svg
-                      className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                    </svg>
-                    <span className="truncate">
-                      {project?.i360__Appointment_Address__c || ''},{' '}
-                      {project?.i360__Appointment_City__c || ''},{' '}
-                      {project?.i360__Appointment_State__c || ''}{' '}
-                      {project?.i360__Appointment_Zip__c || ''}
-                    </span>
-                  </div>
-                )}
+                {project.legacy === false &&
+                  project.i360__Appointment_Address__c && (
+                    <div className="mt-2 flex items-center text-sm leading-5 text-gray-500">
+                      <svg
+                        className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                      </svg>
+                      <span className="truncate">
+                        {project?.i360__Appointment_Address__c || ''},{' '}
+                        {project?.i360__Appointment_City__c || ''},{' '}
+                        {project?.i360__Appointment_State__c || ''}{' '}
+                        {project?.i360__Appointment_Zip__c || ''}
+                      </span>
+                    </div>
+                  )}
                 {'i360__Completed_On__c' in project && (
                   <div className="mt-2 flex items-center text-sm leading-5 text-gray-500">
                     <svg
