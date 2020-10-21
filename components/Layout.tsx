@@ -26,7 +26,7 @@ export function Layout({ children }: LayoutProps) {
     { value: 'name', name: 'Last Name' },
     { value: 'streetAddress', name: 'Street Address' },
     { value: 'productColor', name: 'Product Color' },
-    { value: 'productType', name: 'Product Type' },
+    // { value: 'productType', name: 'Product Type' },
   ]
   const baseFilters = {
     year: 'any',
