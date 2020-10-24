@@ -11,10 +11,12 @@ export default async function Projects(req, res) {
     status = 'any',
     jobType = 'any',
   } = req.body
+  let includeLegacy: boolean = status === 'any' || status === 'legacy'
 
   if (q) {
     if (type === 'zip') {
       filters.i360__Appointment_Zip__c = { $eq: q }
+      includeLegacy = false
     }
     if (type === 'name') {
       filters.Name = { $like: `%${q}%` }
@@ -22,9 +24,11 @@ export default async function Projects(req, res) {
     }
     if (type === 'city') {
       filters.i360__Customer_City__c = { $like: `%${q}%` }
+      includeLegacy = false
     }
     if (type === 'streetAddress') {
       filters.i360__Customer_Street__c = { $like: `%${q}%` }
+      includeLegacy = false
     }
 
     if (type === 'productColor') {
@@ -33,6 +37,7 @@ export default async function Projects(req, res) {
         { Siding_Product_Color__c: { $like: `%${q}%` } },
         { Trim_Color__c: { $like: `%${q}%` } },
       ]
+      includeLegacy = false
     }
   }
 
@@ -46,6 +51,7 @@ export default async function Projects(req, res) {
 
   if (status !== 'any') {
     if (status === 'in-progress') {
+      includeLegacy = false
       filters.i360__Completed_On__c = { $eq: null }
     } else {
       filters.i360__Completed_On__c = { $ne: null }
@@ -54,13 +60,16 @@ export default async function Projects(req, res) {
 
   if (jobType !== 'any') {
     filters.i360__Job_Type_formatted__c = { $like: `%${jobType}%` }
+    includeLegacy = false
   }
 
-  // filters.i360__Customer_State__c = { $nin: ['RI', 'MA', 'CT'] }
-  // filters.i360__Appointment_Latitude__c = { $gt: 40, $lt: 43 }
-  // filters.i360__Appointment_Longitude__c = { $lt: -69, $gt: -72 }
-  // filters.i360__Appointment_Latitude__c = { $eq: null }
-  // filters.i360__Appointment_Longitude__c = { $eq: null }
+  filters.i360__Appointment_State__c = { $in: ['RI', 'MA', 'CT'] }
+
+  filters.i360__Appointment_Latitude__c = { $gt: 40, $lt: 43 }
+  filters.i360__Appointment_Longitude__c = { $lt: -69, $gt: -72 }
+
+  legacyFilters.i360__Latitude__c = { $gt: 40, $lt: 43 }
+  legacyFilters.i360__Longitude__c = { $lt: -69, $gt: -72 }
 
   try {
     const t60 = await connectTo360()
@@ -94,7 +103,7 @@ export default async function Projects(req, res) {
         )
     }
 
-    if (status === 'any' || status === 'legacy') {
+    if (includeLegacy) {
       legacyProjects = await t60
         .sobject<LegacyProject>('i360__Prospect__c')
         .select([

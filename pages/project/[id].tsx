@@ -10,7 +10,7 @@ export default function ProjectPage() {
   const { data: project } = useSWR(`/api/project/${id}`, fetcher)
 
   return (
-    <Dialog aria-labelledby="projectTitle" onDismiss={() => router.push('/')}>
+    <Dialog aria-labelledby="projectTitle" onDismiss={() => router.back()}>
       <Project project={project} />
     </Dialog>
   )

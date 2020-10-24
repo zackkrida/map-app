@@ -29,7 +29,7 @@ export function CustomMap({
 
   const points = useMemo(
     () =>
-      projects.filter(validateLatLng).map(i => ({
+      projects.map(i => ({
         type: 'Feature',
         properties: { cluster: false, id: i.Id, color: getMarkerColor(i) },
         geometry: {
@@ -51,10 +51,7 @@ export function CustomMap({
   useEffect(() => {
     if (projects.length === 0 || !mapRef.current) return
     mapRef.current.fitBounds(
-      getMapBoundsFromProjects(
-        mapsRef.current,
-        projects.filter(validateLatLng)
-      ),
+      getMapBoundsFromProjects(mapsRef.current, projects),
       {
         left: 40,
         right: window.innerWidth > 700 ? 440 : 40,
@@ -158,7 +155,7 @@ function validateLatLng(project: Project | LegacyProject) {
       : project.i360__Appointment_Longitude__c,
   ]
   const latValid = lat > 40 && lat < 43
-  const lngValid = lng < -69 && lng > -74
+  const lngValid = lng < -69 && lng > -72
   const valid = latValid && lngValid
 
   if (!valid) {

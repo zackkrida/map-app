@@ -1,32 +1,31 @@
-import { useLazyRequest } from 'lib/useLazyRequest'
+import {
+  Combobox,
+  ComboboxInput,
+  ComboboxList,
+  ComboboxOption,
+  ComboboxOptionText,
+  ComboboxPopover,
+} from '@reach/combobox'
+import { badUnique, postFetcher } from 'lib/utils'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
 import { Logo } from '../components/Logo'
 import { CustomMap } from './CustomMap'
 import { InfoModal } from './InfoModal'
-import { Select } from './Select'
 import { ProjectList } from './ProjectList'
-import { ProductColors } from 'types/colors'
-import { badUnique } from 'lib/utils'
-import {
-  Combobox,
-  ComboboxInput,
-  ComboboxPopover,
-  ComboboxList,
-  ComboboxOption,
-  ComboboxOptionText,
-} from '@reach/combobox'
+import { Select } from './Select'
 
 export function Layout({ children }: LayoutProps) {
   const router = useRouter()
+  const [projects, setProjects] = useState<ProjectResultList>([])
+  const [productColors, setProductColors] = useState([])
   const types = [
     { value: 'zip', name: 'Zip Code' },
     { value: 'city', name: 'City/Town' },
     { value: 'name', name: 'Last Name' },
     { value: 'streetAddress', name: 'Street Address' },
     { value: 'productColor', name: 'Product Color' },
-    // { value: 'productType', name: 'Product Type' },
   ]
   const baseFilters = {
     year: 'any',
@@ -43,35 +42,58 @@ export function Layout({ children }: LayoutProps) {
   const [filters, setFilters] = useState(baseFilters)
   const [productColorResults, setProductColorResults] = useState([])
 
+  const setNSearch = ({ nq, ntype, nfilters }) => {
+    setQ(nq)
+    setType(ntype)
+    setFilters(nfilters)
+    search({ nq, ntype, nfilters })
+  }
+
+  const dirty =
+    q ||
+    Object.values(filters).some(i => i !== 'any') ||
+    type !== types[0].value
+
   const setFilter = (name: keyof typeof filters) => (value: string) =>
     setFilters({ ...filters, [name]: value })
 
-  const { data: projects = [], fetchMore: fetchMoreProjects } = useLazyRequest(
-    `/api/project`,
-    {
-      q,
-      type,
-      ...filters,
-    }
-  )
-
-  const [productColors, setProductColors] = useState([])
-  const {
-    data: rawProdColors = [],
-    fetchMore: fetchMoreProductColors,
-  } = useLazyRequest(`/api/product-colors`, {})
-
   useEffect(() => {
-    if (rawProdColors.length > 0) {
-      const gottem = badUnique(
-        rawProdColors
+    // load product colors on mount
+    postFetcher('/api/product-colors').then(res => {
+      let colors = badUnique(
+        res
       ).sort((a: { name: string }, b: { name: string }) =>
         a.name.localeCompare(b.name)
       )
-      setProductColors(gottem)
-    }
-  }, [rawProdColors])
+      setProductColors(colors)
+    })
 
+    let nq = ''
+    let ntype = ''
+    let nfilters = baseFilters
+
+    // set filters from query params on mount
+    if (window.location.href.split('?').length > 1) {
+      let params = new URLSearchParams(window.location.href.split('?')[1])
+
+      if (params.get('q')) {
+        nq = params.get('q')
+      }
+      if (params.get('type')) {
+        ntype = params.get('type')
+      }
+      for (const key of Object.keys(baseFilters)) {
+        if (params.get(key)) {
+          nfilters[key as keyof typeof baseFilters] = params.get(key)
+        }
+      }
+    }
+    setNSearch({ nq, ntype, nfilters })
+  }, [])
+
+  /**
+   * Filtering for product color results
+   */
   useEffect(() => {
     if (!q) {
       setProductColorResults(productColors)
@@ -83,68 +105,49 @@ export function Layout({ children }: LayoutProps) {
     )
 
     setProductColorResults(newRes)
-    console.log()
   }, [q, productColors])
 
-  // const {
-  //   data: legacyProjects = [],
-  //   fetchMore: fetchMoreLegacyProjects,
-  // } = useLazyRequest('/api/legacy', { q, type: type.value, ...filters })
-
-  function search(
-    { newQ = q, newType = type, newFilters = filters } = {
-      newQ: q,
-      newType: type,
-      newFilters: filters,
+  async function search(
+    { nq = q, ntype = type, nfilters = filters } = {
+      nq: q,
+      ntype: type,
+      nfilters: filters,
     }
   ) {
     setSearchCount(searchCount + 1)
     setResultsLoading(true)
-    // fetchMoreProjects(searchParams).then(_ => setResultsLoading(false))
-    return Promise.all([
-      fetchMoreProjects({ q: newQ, type: newType, ...newFilters }),
-      fetchMoreProductColors(),
-      // fetchMoreLegacyProjects(searchParams),
-    ]).then(_ => {
-      setResultsLoading(false)
+
+    let projects = await postFetcher(`/api/project`, {
+      q: nq,
+      type: ntype,
+      ...nfilters,
     })
+
+    setProjects(projects)
+    setResultsLoading(false)
   }
 
   function reset() {
-    let newQ = ''
-    let newType = types[0].value
-    let newFilters = baseFilters
-
-    setQ(newQ)
-    setType(newType)
-    setFilters(newFilters)
-    search({ newQ, newFilters, newType })
+    let nq = ''
+    let ntype = types[0].value
+    let nfilters = baseFilters
+    setNSearch({ nq, ntype, nfilters })
   }
-
-  // Submit search whenver the page is mounted
-  useEffect(() => {
-    let newQ = (router.query?.q as string) || ''
-    let newFilters = filters
-    let newType = (router.query.type as string) || type
-    for (const filter of Object.keys(filters)) {
-      if (router.query[filter]) {
-        newFilters[filter] = router.query[filter]
-      }
-    }
-
-    search({ newQ, newFilters, newType })
-    setQ(newQ)
-    setType(newType)
-    setFilters(newFilters)
-  }, [router.query])
 
   function handleSubmit(event) {
     event.preventDefault()
-    router.push(
-      { pathname: router.pathname, query: { q, type, ...filters } },
-      undefined,
-      { shallow: true }
-    )
+    search().then(() => {
+      router.push(
+        {
+          pathname: window.location.pathname,
+          query: { q, type, ...removeAnys(filters) },
+        },
+        undefined,
+        {
+          shallow: true,
+        }
+      )
+    })
   }
 
   if (!projects) {
@@ -246,18 +249,15 @@ export function Layout({ children }: LayoutProps) {
                       {showFilters ? 'Hide Filters' : 'Filters'}
                     </button>
 
-                    {q !== '' ||
-                      (Object.entries(filters).some(
-                        ([i, value]) => value !== 'any'
-                      ) && (
-                        <button
-                          type="button"
-                          className="bg-white bg-opacity-25 px-2 py-2 mr-2 rounded-md inline-flex border-white border border-opacity-0 items-center text-sm focus:outline-none focus:border-opacity-100 focus:shadow-md focus:bg-opacity-100 focus:text-brand-blue hover:border-opacity-100 hover:shadow-md hover:bg-opacity-100 hover:text-brand-blue transition-bg duration-100 ease-in-out"
-                          onClick={reset}
-                        >
-                          Reset
-                        </button>
-                      ))}
+                    {dirty && (
+                      <button
+                        type="button"
+                        className="bg-white bg-opacity-25 px-2 py-2 mr-2 rounded-md inline-flex border-white border border-opacity-0 items-center text-sm focus:outline-none focus:border-opacity-100 focus:shadow-md focus:bg-opacity-100 focus:text-brand-blue hover:border-opacity-100 hover:shadow-md hover:bg-opacity-100 hover:text-brand-blue transition-bg duration-100 ease-in-out"
+                        onClick={reset}
+                      >
+                        Reset
+                      </button>
+                    )}
 
                     <button
                       disabled={resultsLoading}
@@ -395,7 +395,6 @@ function Filters({
   filters: any
   setFilter: (name) => (value) => void
 }) {
-  const router = useRouter()
   const today = new Date()
   const years = Array(30)
     .fill('')
@@ -441,4 +440,18 @@ function Filters({
       </div>
     </div>
   )
+}
+
+/**
+ * Remove object values that equal the string 'any'
+ * @param obj Any object
+ */
+function removeAnys(obj) {
+  let clean = {}
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== 'any') {
+      clean[key] = value
+    }
+  }
+  return clean
 }
