@@ -10,6 +10,7 @@ export default async function Projects(req, res) {
     year = 'any',
     status = 'any',
     jobType = 'any',
+    productColor = 'any',
   } = req.body
   let includeLegacy: boolean = status === 'any' || status === 'legacy'
 
@@ -30,18 +31,9 @@ export default async function Projects(req, res) {
       filters.i360__Customer_Street__c = { $like: `%${q}%` }
       includeLegacy = false
     }
-
-    if (type === 'productColor') {
-      filters.$or = [
-        { Roofing_Product_Color__c: { $like: `%${q}%` } },
-        { Siding_Product_Color__c: { $like: `%${q}%` } },
-        { Trim_Color__c: { $like: `%${q}%` } },
-      ]
-      includeLegacy = false
-    }
   }
 
-  if (year !== 'any') {
+  if (has(year)) {
     let createdDate = SfDate.toDateTimeLiteral(new Date(year))
     filters.CreatedDate = { $gt: createdDate }
     legacyFilters.Legacy_Sold_On_Date__c = { $gt: createdDate }
@@ -49,7 +41,7 @@ export default async function Projects(req, res) {
     legacyFilters.Legacy_Sold_On_Date__c = { $ne: null }
   }
 
-  if (status !== 'any') {
+  if (has(status)) {
     if (status === 'in-progress') {
       includeLegacy = false
       filters.i360__Completed_On__c = { $eq: null }
@@ -58,13 +50,21 @@ export default async function Projects(req, res) {
     }
   }
 
-  if (jobType !== 'any') {
+  if (has(jobType)) {
     filters.i360__Job_Type_formatted__c = { $like: `%${jobType}%` }
     includeLegacy = false
   }
 
-  filters.i360__Appointment_State__c = { $in: ['RI', 'MA', 'CT'] }
+  if (has(productColor)) {
+    filters.$or = [
+      { Roofing_Product_Color__c: { $like: `%${productColor}%` } },
+      { Siding_Product_Color__c: { $like: `%${productColor}%` } },
+      { Trim_Color__c: { $like: `%${productColor}%` } },
+    ]
+    includeLegacy = false
+  }
 
+  filters.i360__Appointment_State__c = { $in: ['RI', 'MA', 'CT'] }
   filters.i360__Appointment_Latitude__c = { $gt: 40, $lt: 43 }
   filters.i360__Appointment_Longitude__c = { $lt: -69, $gt: -72 }
 
@@ -129,3 +129,5 @@ export default async function Projects(req, res) {
     res.json({ error: true, message: error.message })
   }
 }
+
+const has = value => value !== 'any'

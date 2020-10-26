@@ -16,23 +16,22 @@ import { InfoModal } from './InfoModal'
 import { ProjectList } from './ProjectList'
 import { Select } from './Select'
 
+const baseFilters = {
+  year: 'any',
+  status: 'any',
+  jobType: 'any',
+  productColor: 'any',
+}
+
 export function Layout({ children }: LayoutProps) {
   const router = useRouter()
   const [projects, setProjects] = useState<ProjectResultList>([])
-  const [productColors, setProductColors] = useState([])
   const types = [
     { value: 'zip', name: 'Zip Code' },
     { value: 'city', name: 'City/Town' },
     { value: 'name', name: 'Last Name' },
     { value: 'streetAddress', name: 'Street Address' },
-    { value: 'productColor', name: 'Product Color' },
   ]
-  const baseFilters = {
-    year: 'any',
-    status: 'any',
-    jobType: 'any',
-    productColor: 'any',
-  }
   const [q, setQ] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   const [type, setType] = useState<string>(types[0].value)
@@ -40,7 +39,6 @@ export function Layout({ children }: LayoutProps) {
   const [resultsLoading, setResultsLoading] = useState(false)
   const [activeItem, setActiveItem] = useState<string>(null)
   const [filters, setFilters] = useState(baseFilters)
-  const [productColorResults, setProductColorResults] = useState([])
 
   const setNSearch = ({ nq, ntype, nfilters }) => {
     setQ(nq)
@@ -56,56 +54,6 @@ export function Layout({ children }: LayoutProps) {
 
   const setFilter = (name: keyof typeof filters) => (value: string) =>
     setFilters({ ...filters, [name]: value })
-
-  useEffect(() => {
-    // load product colors on mount
-    postFetcher('/api/product-colors').then(res => {
-      let colors = badUnique(
-        res
-      ).sort((a: { name: string }, b: { name: string }) =>
-        a.name.localeCompare(b.name)
-      )
-      setProductColors(colors)
-    })
-
-    let nq = ''
-    let ntype = ''
-    let nfilters = baseFilters
-
-    // set filters from query params on mount
-    if (window.location.href.split('?').length > 1) {
-      let params = new URLSearchParams(window.location.href.split('?')[1])
-
-      if (params.get('q')) {
-        nq = params.get('q')
-      }
-      if (params.get('type')) {
-        ntype = params.get('type')
-      }
-      for (const key of Object.keys(baseFilters)) {
-        if (params.get(key)) {
-          nfilters[key as keyof typeof baseFilters] = params.get(key)
-        }
-      }
-    }
-    setNSearch({ nq, ntype, nfilters })
-  }, [])
-
-  /**
-   * Filtering for product color results
-   */
-  useEffect(() => {
-    if (!q) {
-      setProductColorResults(productColors)
-      return
-    }
-
-    let newRes = [...productColors].filter(i =>
-      i.name.toLowerCase().includes(q.toLowerCase())
-    )
-
-    setProductColorResults(newRes)
-  }, [q, productColors])
 
   async function search(
     { nq = q, ntype = type, nfilters = filters } = {
@@ -150,6 +98,30 @@ export function Layout({ children }: LayoutProps) {
     })
   }
 
+  useEffect(() => {
+    let nq = ''
+    let ntype = ''
+    let nfilters = baseFilters
+
+    // set filters from query params on mount
+    if (window.location.href.split('?').length > 1) {
+      let params = new URLSearchParams(window.location.href.split('?')[1])
+
+      if (params.get('q')) {
+        nq = params.get('q')
+      }
+      if (params.get('type')) {
+        ntype = params.get('type')
+      }
+      for (const key of Object.keys(baseFilters)) {
+        if (params.get(key)) {
+          nfilters[key as keyof typeof baseFilters] = params.get(key)
+        }
+      }
+    }
+    setNSearch({ nq, ntype, nfilters })
+  }, [])
+
   if (!projects) {
     return <div>Loading...</div>
   }
@@ -185,7 +157,7 @@ export function Layout({ children }: LayoutProps) {
             >
               <form className="relative" onSubmit={handleSubmit}>
                 <div className="mx-2 flex md:rounded-md shadow-sm relative rounded-none rounded-l-md transition duration-150 ease-in-out sm:text-sm sm:leading-5 text-brand-navy">
-                  <ComboboxInput
+                  <input
                     type="text"
                     value={q}
                     onChange={event => setQ(event.target.value)}
@@ -309,49 +281,6 @@ export function Layout({ children }: LayoutProps) {
                       )}
                     </button>
                   </div>
-
-                  {type === 'productColor' && (
-                    <ComboboxPopover className="absolute top-2 z-20 w-full left-0 right-0">
-                      {/* <div className="rounded-md bg-white shadow-lg mx-2"> */}
-                      <ComboboxList className="max-h-60 rounded-md py-1 text-base leading-6 shadow-xs overflow-auto focus:outline-none sm:text-sm sm:leading-5">
-                        {productColorResults.map(i => (
-                          <div key={JSON.stringify(i)}>
-                            <ComboboxOption value={i.name}>
-                              <div className="flex">
-                                <ComboboxOptionText />
-                                {/* <!-- Highlighted: "text-indigo-200", Not Highlighted: "text-gray-500" --> */}
-                                <span className="text-gray-500 truncate ml-auto">
-                                  {i.type}
-                                </span>
-                              </div>
-
-                              {/* <!--
-            Checkmark, only display for selected option.
-
-            Highlighted: "text-white", Not Highlighted: "text-indigo-600"
-          --> */}
-                              <span className="absolute inset-y-0 right-0 flex items-center pr-4 hidden">
-                                {/* <!-- Heroicon name: check --> */}
-                                <svg
-                                  className="h-5 w-5"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  viewBox="0 0 20 20"
-                                  fill="currentColor"
-                                >
-                                  <path
-                                    fill-rule="evenodd"
-                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                    clip-rule="evenodd"
-                                  />
-                                </svg>
-                              </span>
-                            </ComboboxOption>
-                          </div>
-                        ))}
-                      </ComboboxList>
-                      {/* </div> */}
-                    </ComboboxPopover>
-                  )}
                 </div>
                 {showFilters && (
                   <Filters filters={filters} setFilter={setFilter} />
@@ -403,9 +332,87 @@ function Filters({
       value: `${today.getFullYear() - i}`,
     }))
 
+  const [productColors, setProductColors] = useState([])
+  const [productColorResults, setProductColorResults] = useState([])
+
+  /**
+   * Filtering for product color results
+   */
+  useEffect(() => {
+    if (filters.productColor !== 'any') {
+      setProductColorResults(productColors)
+      return
+    }
+
+    let newRes = [...productColors].filter(i =>
+      i.name.toLowerCase().includes(filters.productColor.toLowerCase())
+    )
+
+    setProductColorResults(newRes)
+  }, [filters.productColor, productColors])
+
+  useEffect(() => {
+    // load product colors on mount
+    postFetcher('/api/product-colors').then(res => {
+      let colors = badUnique(
+        res
+      ).sort((a: { name: string }, b: { name: string }) =>
+        a.name.localeCompare(b.name)
+      )
+      setProductColors(colors)
+    })
+  }, [])
+
   return (
     <div className="px-2 py-4 top-full l-0 r-0 w-full bg-brand-gray">
-      <div className="grid grid-cols-3 gap-2 grid-flow-row">
+      <div className="grid grid-cols-3 gap-2 grid-flow-row relative">
+        <Combobox
+          className="col-span-3 text-gray-600"
+          openOnFocus
+          onSelect={setFilter('productColor')}
+        >
+          <label className="block text-sm leading-5 font-medium text-white">
+            Product Color
+          </label>
+          <ComboboxInput
+            value={filters.productColor === 'any' ? '' : filters.productColor}
+            onChange={e => setFilter('productColor')(e.target.value)}
+            className="flex-1 block w-full form-input placeholder-cool-gray-500 text-grey-500 text-sm mt-1"
+            placeholder="Filter by product color"
+          />
+          <ComboboxPopover className="absolute top-2 z-20 w-full left-0 right-0">
+            <ComboboxList className="max-h-60 rounded-md py-1 text-base leading-6 shadow-xs overflow-auto focus:outline-none sm:text-sm sm:leading-5">
+              {productColorResults.map(i => (
+                <div key={JSON.stringify(i)}>
+                  <ComboboxOption value={i.name}>
+                    <div className="flex">
+                      <ComboboxOptionText />
+                      <span className="text-gray-500 truncate ml-auto">
+                        {i.type}
+                      </span>
+                    </div>
+
+                    <span className="absolute inset-y-0 right-0 flex items-center pr-4 hidden">
+                      <svg
+                        className="h-5 w-5"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </span>
+                  </ComboboxOption>
+                </div>
+              ))}
+            </ComboboxList>
+          </ComboboxPopover>
+        </Combobox>
+
         <Select
           label="Created After"
           fallback="Any"
