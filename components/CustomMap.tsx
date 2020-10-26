@@ -1,5 +1,5 @@
 import GoogleMap from 'google-map-react'
-import { getMapBoundsFromProjects } from 'lib/utils'
+import { getLat, getLng, getMapBoundsFromProjects } from 'lib/utils'
 import React, { useMemo, useRef, useState, useEffect } from 'react'
 import useSupercluster from 'use-supercluster'
 import { getMarkerColor, Marker, RawMarker } from './Marker'
@@ -7,10 +7,14 @@ import { getMarkerColor, Marker, RawMarker } from './Marker'
 const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 const mapSettings = {
   zoom: 11,
+  minZoom: 9,
+  maxZoom: 19,
   pos: {
     lat: 41.67391,
     lng: -70.9033,
   },
+  padding: 40,
+  showMarkersAtZoom: 13,
 }
 
 export function CustomMap({
@@ -34,14 +38,7 @@ export function CustomMap({
         properties: { cluster: false, id: i.Id, color: getMarkerColor(i) },
         geometry: {
           type: 'Point',
-          coordinates: [
-            i.legacy === true
-              ? i.i360__Longitude__c
-              : i.i360__Appointment_Longitude__c,
-            i.legacy === true
-              ? i.i360__Latitude__c
-              : i.i360__Appointment_Latitude__c,
-          ],
+          coordinates: [getLng(i), getLat(i)],
         },
       })),
     [projects]
@@ -53,10 +50,10 @@ export function CustomMap({
     mapRef.current.fitBounds(
       getMapBoundsFromProjects(mapsRef.current, projects),
       {
-        left: 40,
-        right: window.innerWidth > 700 ? 440 : 40,
-        top: 40,
-        bottom: 40,
+        left: mapSettings.padding,
+        right: window.innerWidth > 700 ? 440 : mapSettings.padding,
+        top: mapSettings.padding,
+        bottom: mapSettings.padding,
       }
     )
   }, [projects])
@@ -66,7 +63,11 @@ export function CustomMap({
     points,
     bounds,
     zoom,
-    options: { radius: 300, maxZoom: 16, minZoom: 9 },
+    options: {
+      radius: 300,
+      maxZoom: mapSettings.showMarkersAtZoom,
+      minZoom: mapSettings.minZoom,
+    },
   })
 
   return (
@@ -75,8 +76,8 @@ export function CustomMap({
       defaultZoom={mapSettings.zoom}
       options={{
         fullscreenControl: false,
-        minZoom: 9,
-        maxZoom: 19,
+        minZoom: mapSettings.minZoom,
+        maxZoom: mapSettings.maxZoom,
         zoomControlOptions: { position: 4 },
       }}
       bootstrapURLKeys={{ key }}
@@ -130,39 +131,4 @@ export function CustomMap({
       })}
     </GoogleMap>
   )
-}
-
-/**
- * Sloppy, but make sure our Lat and Lng fall into
- * a generally-acceptable, expected range for New England.
- */
-function validateLatLng(project: Project | LegacyProject) {
-  if (
-    project.legacy === true
-      ? !project.i360__Latitude__c || !project.i360__Longitude__c
-      : !project.i360__Appointment_Latitude__c ||
-        !project.i360__Appointment_Longitude__c
-  ) {
-    return false
-  }
-
-  const [lat, lng] = [
-    project.legacy === true
-      ? project.i360__Latitude__c
-      : project.i360__Appointment_Latitude__c,
-    project.legacy === true
-      ? project.i360__Longitude__c
-      : project.i360__Appointment_Longitude__c,
-  ]
-  const latValid = lat > 40 && lat < 43
-  const lngValid = lng < -69 && lng > -72
-  const valid = latValid && lngValid
-
-  if (!valid) {
-    console.error(
-      `Project ${project.Id} has an invalid lat/lng: ${lat} ${lng}.`
-    )
-  }
-
-  return valid
 }

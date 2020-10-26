@@ -1,5 +1,11 @@
 import { ProductColors } from 'types/colors'
 
+export const getLat = (i: Project | LegacyProject) =>
+  i.legacy === true ? i.i360__Latitude__c : i.i360__Appointment_Latitude__c
+
+export const getLng = (i: Project | LegacyProject) =>
+  i.legacy === true ? i.i360__Longitude__c : i.i360__Appointment_Longitude__c
+
 export const scrollTo = (selector: string) => {
   const $el = document.querySelector(selector)
   if ($el)
@@ -29,23 +35,8 @@ export const getMapBoundsFromProjects = (maps, projects: ProjectResultList) => {
   const bounds = new maps.LatLngBounds()
 
   projects.forEach(project => {
-    if (
-      project.legacy === true
-        ? project.i360__Latitude__c && project.i360__Longitude__c
-        : project.i360__Appointment_Latitude__c &&
-          project.i360__Appointment_Longitude__c
-    ) {
-      bounds.extend(
-        new maps.LatLng(
-          project.legacy === true
-            ? project.i360__Latitude__c
-            : project.i360__Appointment_Latitude__c,
-          project.legacy === true
-            ? project.i360__Longitude__c
-            : project.i360__Appointment_Longitude__c
-        )
-      )
-    }
+    const [lat, lng] = [getLat(project), getLng(project)]
+    if (lat && lng) bounds.extend(new maps.LatLng(lat, lng))
   })
 
   return bounds
