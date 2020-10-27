@@ -10,7 +10,7 @@ export function Project({
 }) {
   const router = useRouter()
   const loading = typeof project === 'undefined'
-  const isLegacy = project.legacy === true
+  const isLegacy = project?.legacy === true
   const show = value => (loading ? <Skeleton /> : value)
 
   const hasProducts = isLegacy
@@ -74,7 +74,7 @@ export function Project({
               Address
             </dt>
             <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
-              {show(getAddressString(project))}
+              {show(project && getAddressString(project))}
             </dd>
           </div>
           {!isLegacy && (
@@ -109,14 +109,14 @@ export function Project({
             <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
               {show(
                 (
-                  project.legacy === true
+                  project?.legacy === true
                     ? project?.Legacy_Sold_On_Date__c
-                    : project.i360__Completed_On__c
+                    : project?.i360__Completed_On__c
                 )
                   ? prettyDate(
-                      project.legacy === true
+                      project?.legacy === true
                         ? project?.Legacy_Sold_On_Date__c
-                        : project.i360__Completed_On__c
+                        : project?.i360__Completed_On__c
                     )
                   : 'In Progress'
               )}
@@ -128,7 +128,7 @@ export function Project({
             </dt>
             <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
               {show(
-                project.legacy === true
+                project?.legacy === true
                   ? project.Sales_Rep__c
                   : project?.i360__Sale_Rep__c
               )}

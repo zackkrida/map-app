@@ -24,10 +24,12 @@ interface Project {
 }
 
 interface ExtendedProject extends Project {
+  CreatedDate: Date
   Roofing_Product_Color__c: string
   Siding_Product_Color__c: string
   Trim_Color__c: string
   i360__Sale_Rep__c: string
+  i360__Job_Type_formatted__c: string
 }
 
 interface LegacyProject {
@@ -45,6 +47,7 @@ interface LegacyProject {
 }
 
 interface ExtendedLegacyProject extends LegacyProject {
+  CreatedDate: Date
   Sales_Rep__c: string
 }
 

@@ -2,8 +2,10 @@ import { connectTo360 } from 'lib/three60'
 const { SfDate } = require('jsforce')
 
 export default async function Projects(req, res) {
-  const filters: any = {}
-  const legacyFilters: any = {}
+  const filters: Partial<{ [key in keyof ExtendedProject | '$or']: any }> = {}
+  const legacyFilters: Partial<
+    { [key in keyof ExtendedLegacyProject]: {} }
+  > = {}
   const {
     q = '',
     type = 'zip',
@@ -17,19 +19,19 @@ export default async function Projects(req, res) {
   if (q) {
     if (type === 'zip') {
       filters.i360__Appointment_Zip__c = { $eq: q }
-      includeLegacy = false
+      legacyFilters.i360__Home_Zip_Postal_Code__c = { $eq: q }
     }
     if (type === 'name') {
-      filters.Name = { $like: `%${q}%` }
+      filters.i360__Correspondence_Name__c = { $like: `%${q}%` }
       legacyFilters.i360__Correspondence_Name__c = { $like: `%${q}%` }
     }
     if (type === 'city') {
-      filters.i360__Customer_City__c = { $like: `%${q}%` }
-      includeLegacy = false
+      filters.i360__Appointment_City__c = { $like: `%${q}%` }
+      legacyFilters.i360__Home_City__c = { $like: `%${q}%` }
     }
     if (type === 'streetAddress') {
-      filters.i360__Customer_Street__c = { $like: `%${q}%` }
-      includeLegacy = false
+      filters.i360__Appointment_Address__c = { $like: `%${q}%` }
+      legacyFilters.i360__Home_Address__c = { $like: `%${q}%` }
     }
   }
 
