@@ -1,9 +1,7 @@
+import { withAuth } from 'lib/session'
 import { connectTo360 } from 'lib/three60'
-import { onlyUnique } from 'lib/utils'
 
-export default async function Project(req, res) {
-  const { type } = req.body
-
+async function ProductColors(req, res) {
   try {
     const t60 = await connectTo360()
     const projects = await t60
@@ -43,3 +41,5 @@ export default async function Project(req, res) {
     res.json({ error: true, message: error.message })
   }
 }
+
+export default withAuth(ProductColors)

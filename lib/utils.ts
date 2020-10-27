@@ -23,7 +23,14 @@ export const postFetcher = (url, data = {}) =>
     method: 'POST',
     body: JSON.stringify(data),
     headers: { 'Content-Type': 'application/json' },
-  }).then(res => res.json())
+  })
+    .then(res => res.json())
+    .then(res => {
+      if (res.error && res.message === 'User is not authenticated') {
+        throw new Error('User is not authenticated')
+      }
+      return res
+    })
 
 export const getBrandColor = color => ProductColors[color] ?? 'bg-brand-orange'
 
@@ -101,4 +108,18 @@ export function downloadBlob(blob, filename) {
   // Useful if you want a reference to the element
   // in order to attach it to the DOM or use it in some other way
   return a
+}
+
+/**
+ * Remove object values that equal the string 'any'
+ * @param obj Any object
+ */
+export function removeAnys(obj) {
+  let clean = {}
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== 'any') {
+      clean[key] = value
+    }
+  }
+  return clean
 }

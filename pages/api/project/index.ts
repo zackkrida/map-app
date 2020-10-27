@@ -1,7 +1,13 @@
 import { connectTo360 } from 'lib/three60'
+import { withAuth } from 'lib/session'
 const { SfDate } = require('jsforce')
 
-export default async function Projects(req, res) {
+async function Projects(req, res) {
+  if (!req.session.get('user')) {
+    res.json({ error: true, message: 'User is not authenticated' })
+    return
+  }
+
   const filters: Partial<{ [key in keyof ExtendedProject | '$or']: any }> = {}
   const legacyFilters: Partial<
     { [key in keyof ExtendedLegacyProject]: {} }
@@ -139,3 +145,5 @@ export default async function Projects(req, res) {
 }
 
 const has = value => value !== 'any'
+
+export default withAuth(Projects)

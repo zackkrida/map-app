@@ -1,7 +1,12 @@
+import { withAuth } from 'lib/session'
 import { connectTo360 } from 'lib/three60'
-const { SfDate } = require('jsforce')
 
-export default async function Jobs(req, res) {
+async function Jobs(req, res) {
+  if (!req.session.get('user')) {
+    res.json({ error: true, message: 'User is not authenticated' })
+    return
+  }
+
   try {
     const t60 = await connectTo360()
     const legacyProjects = await t60
@@ -28,3 +33,5 @@ export default async function Jobs(req, res) {
     res.json({ error: true, message: error.message })
   }
 }
+
+export default withAuth(Jobs)

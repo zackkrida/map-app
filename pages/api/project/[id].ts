@@ -1,6 +1,12 @@
+import { withAuth } from 'lib/session'
 import { connectTo360 } from 'lib/three60'
 
-export default async function Project(req, res) {
+async function Project(req, res) {
+  if (!req.session.get('user')) {
+    res.json({ error: true, message: 'User is not authenticated' })
+    return
+  }
+
   const { id } = req.query
 
   try {
@@ -16,3 +22,5 @@ export default async function Project(req, res) {
     res.json({ error: true, message: error.message })
   }
 }
+
+export default withAuth(Project)
