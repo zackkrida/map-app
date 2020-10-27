@@ -367,7 +367,7 @@ function Filters({
    * Filtering for product color results
    */
   useEffect(() => {
-    if (filters.productColor !== 'any') {
+    if (filters.productColor === 'any') {
       setProductColorResults(productColors)
       return
     }
@@ -396,8 +396,8 @@ function Filters({
       <div className="grid grid-cols-3 gap-2 grid-flow-row relative">
         <Combobox
           className="col-span-3 text-gray-600"
-          openOnFocus
           onSelect={setFilter('productColor')}
+          openOnFocus
         >
           <label className="block text-sm leading-5 font-medium text-white">
             Product Color
