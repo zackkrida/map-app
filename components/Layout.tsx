@@ -6,12 +6,19 @@ import {
   ComboboxOptionText,
   ComboboxPopover,
 } from '@reach/combobox'
-import { badUnique, postFetcher } from 'lib/utils'
+import { Menu, MenuButton, MenuItem, MenuList } from '@reach/menu-button'
+import {
+  badUnique,
+  downloadBlob,
+  getAddressString,
+  postFetcher,
+} from 'lib/utils'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
 import { Logo } from '../components/Logo'
 import { CustomMap } from './CustomMap'
+import { DropdownButton } from './DropdownButton'
 import { InfoModal } from './InfoModal'
 import { ProjectList } from './ProjectList'
 import { Select } from './Select'
@@ -136,7 +143,6 @@ export function Layout({ children }: LayoutProps) {
             <Logo />
           </a>
         </Link>
-
         <div className="relative md:absolute w-full flex-grow md:h-screen">
           <div className="absolute h-full min-h-full w-full">
             <CustomMap
@@ -146,7 +152,6 @@ export function Layout({ children }: LayoutProps) {
             />
           </div>
         </div>
-
         {/* Results Sidebar */}
         <div className="w-full md:max-w-md flex flex-col-reverse md:flex-col md:max-h-screen shadow-md z-20 md:m-4 md:rounded-md md:ml-auto overflow-hidden bg-white relative">
           <div className="pt-4 bg-brand-navy text-white shadow-md">
@@ -310,6 +315,29 @@ export function Layout({ children }: LayoutProps) {
               </div>
             </div>
           )}
+          <div className="w-full bg-brand-navy p-2 text-sm hidden md:flex justify-end">
+            <DropdownButton
+              label="Export results"
+              options={[
+                {
+                  label: 'Copy share link',
+                  action: () =>
+                    navigator.clipboard.writeText(window.location.href),
+                },
+                {
+                  label: 'Download .txt file of addresses',
+                  action: () => {
+                    const content = projects.reduce((str, project) => {
+                      if (project.legacy) return str
+                      return `${str} \n${getAddressString(project as Project)}`
+                    }, `Search Results from ${new Date().toLocaleDateString()}\n`)
+                    const blob = new Blob([content], { type: 'text/plain' })
+                    downloadBlob(blob, 'results.txt')
+                  },
+                },
+              ]}
+            />
+          </div>
         </div>
       </div>
       <InfoModal />

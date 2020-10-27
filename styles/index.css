@@ -64,4 +64,13 @@ body {
   @apply .font-semibold !important;
 }
 
+[data-reach-menu],
+[data-reach-menu-popover] {
+  @apply .z-40 .rounded-md .mb-2;
+}
+
+[data-reach-menu-items] {
+  padding: 0 !important;
+}
+
 @tailwind utilities;
