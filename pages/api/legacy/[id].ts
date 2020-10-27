@@ -1,5 +1,4 @@
 import { connectTo360 } from 'lib/three60'
-import { ExtendedLegacyProject } from 'types/types'
 
 export default async function Project(req, res) {
   const { id } = req.query
