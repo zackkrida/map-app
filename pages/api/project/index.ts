@@ -108,6 +108,10 @@ export default async function Projects(req, res) {
         .sobject<LegacyProject>('i360__Prospect__c')
         .select([
           'Id',
+          'i360__Home_Address__c',
+          'i360__Home_City__c',
+          'i360__Home_State__c',
+          'i360__Home_Zip_Postal_Code__c',
           'i360__Correspondence_Name__c',
           'i360__Longitude__c',
           'i360__Latitude__c',
@@ -122,6 +126,8 @@ export default async function Projects(req, res) {
           })
         )
     }
+
+    console.log(legacyProjects[0])
 
     res.json([...projects, ...legacyProjects])
   } catch (error) {

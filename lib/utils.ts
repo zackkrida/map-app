@@ -59,9 +59,9 @@ export const badUnique = (arr: any[]) => {
   return results
 }
 
-export const getAddressString = (project: Project) =>
-  project.legacy
-    ? ''
+export const getAddressString = (project: Project | LegacyProject) =>
+  project.legacy === true
+    ? `${project.i360__Home_Address__c} ${project.i360__Home_City__c}, ${project.i360__Home_State__c} ${project.i360__Home_Zip_Postal_Code__c}`
     : `${project.i360__Appointment_Address__c} ${project.i360__Appointment_City__c}, ${project?.i360__Appointment_State__c} ${project?.i360__Appointment_Zip__c}`
 
 export function downloadBlob(blob, filename) {

@@ -20,33 +20,16 @@ export function ProjectListItem({
     className = `${className} ${activeClass}`
   }
 
-  let Wrapper = ({ children }) => (
-    <div
-      style={{ height: '135px' }}
-      data-index={project.Id}
-      className={className}
-    >
-      {children}
-    </div>
-  )
-
-  if (!isLegacy) {
-    Wrapper = ({ children }) => (
-      <Link
-        href={`/project/[id]`}
-        as={`/project/${project.Id}`}
-        prefetch={false}
-      >
-        <a data-index={project.Id} className={className}>
-          {children}
-        </a>
-      </Link>
-    )
-  }
+  const basePath = isLegacy ? 'legacy-project' : 'project'
+  const href = `/${basePath}/${project.Id}`
 
   return (
-    <Wrapper>
-      <div className="flex items-center px-2 md:px-4 py-4" onClick={onClick}>
+    <Link href={href} prefetch={false}>
+      <div
+        className="flex items-center px-2 md:px-4 py-4"
+        onClick={onClick}
+        style={{ height: '135px' }}
+      >
         <div className="min-w-0 flex-1 flex items-center">
           {/* <div className="flex-shrink-0">
               <img
@@ -61,25 +44,24 @@ export function ProjectListItem({
                 {project.i360__Correspondence_Name__c}
               </div>
               <div className="flex flex-col">
-                {project.legacy === false &&
-                  project.i360__Appointment_Address__c && (
-                    <div className="mt-2 flex items-center text-sm leading-5 text-gray-500">
-                      <svg
-                        className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
-                        fill="none"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                      </svg>
-                      <span className="truncate">
-                        {getAddressString(project)}
-                      </span>
-                    </div>
-                  )}
+                {
+                  <div className="mt-2 flex items-center text-sm leading-5 text-gray-500">
+                    <svg
+                      className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    <span className="truncate">
+                      {getAddressString(project)}
+                    </span>
+                  </div>
+                }
                 {'i360__Completed_On__c' in project && (
                   <div className="mt-2 flex items-center text-sm leading-5 text-gray-500">
                     <svg
@@ -131,22 +113,20 @@ export function ProjectListItem({
             )}
           </div>
         </div>
-        {!isLegacy && (
-          <div className="hidden md:block">
-            <svg
-              className="h-5 w-5 text-gray-400"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </div>
-        )}
+        <div className="hidden md:block">
+          <svg
+            className="h-5 w-5 text-gray-400"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fillRule="evenodd"
+              d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </div>
       </div>
-    </Wrapper>
+    </Link>
   )
 }

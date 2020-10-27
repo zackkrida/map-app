@@ -1,17 +1,23 @@
 import Skeleton from 'react-loading-skeleton'
 import { useRouter } from 'next/router'
-import { getBrandColor, prettyDate } from 'lib/utils'
+import { getAddressString, getBrandColor, prettyDate } from 'lib/utils'
 import { Logo } from './Logo'
 
-export function Project({ project }) {
+export function Project({
+  project,
+}: {
+  project: ExtendedProject | ExtendedLegacyProject
+}) {
   const router = useRouter()
   const loading = typeof project === 'undefined'
-
+  const isLegacy = project.legacy === true
   const show = value => (loading ? <Skeleton /> : value)
-  const hasProducts =
-    project?.Roofing_Product_Color__c ||
-    project?.Siding_Product_Color__c ||
-    project?.Trim_Color__c
+
+  const hasProducts = isLegacy
+    ? false
+    : (project as ExtendedProject)?.Roofing_Product_Color__c ||
+      (project as ExtendedProject)?.Siding_Product_Color__c ||
+      (project as ExtendedProject)?.Trim_Color__c
 
   return (
     <div className="bg-white shadow overflow-hidden shadow-md sm:rounded-lg w-full relative">
@@ -68,45 +74,50 @@ export function Project({ project }) {
               Address
             </dt>
             <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
-              {show(
-                <>
-                  {project?.i360__Appointment_Address__c},{' '}
-                  {project?.i360__Appointment_City__c},{' '}
-                  {project?.i360__Appointment_State__c}{' '}
-                  {project?.i360__Appointment_Zip__c}
-                </>
-              )}
+              {show(getAddressString(project))}
             </dd>
           </div>
-          <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
-            <dt className="text-sm leading-5 font-medium text-gray-500">
-              Services Included
-            </dt>
-            <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
-              {show(
-                <div className="flex capitalize text-white mt-2 justify-start">
-                  {project?.i360__Job_Type__c.split(';').map(i => (
-                    <div
-                      key={`${project.Id}-${i}`}
-                      className={`mr-2 ${getBrandColor(
-                        i
-                      )} px-4 py-2 rounded-md`}
-                    >
-                      {i}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </dd>
-          </div>
+          {!isLegacy && (
+            <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
+              <dt className="text-sm leading-5 font-medium text-gray-500">
+                Services Included
+              </dt>
+              <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
+                {show(
+                  <div className="flex capitalize text-white mt-2 justify-start">
+                    {(project as ExtendedProject)?.i360__Job_Type__c
+                      .split(';')
+                      .map(i => (
+                        <div
+                          key={`${project.Id}-${i}`}
+                          className={`mr-2 ${getBrandColor(
+                            i
+                          )} px-4 py-2 rounded-md`}
+                        >
+                          {i}
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </dd>
+            </div>
+          )}
           <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
             <dt className="text-sm leading-5 font-medium text-gray-500">
               Date Completed
             </dt>
             <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
               {show(
-                project?.i360__Completed_On__c
-                  ? prettyDate(project.i360__Completed_On__c)
+                (
+                  project.legacy === true
+                    ? project?.Legacy_Sold_On_Date__c
+                    : project.i360__Completed_On__c
+                )
+                  ? prettyDate(
+                      project.legacy === true
+                        ? project?.Legacy_Sold_On_Date__c
+                        : project.i360__Completed_On__c
+                    )
                   : 'In Progress'
               )}
             </dd>
@@ -116,7 +127,11 @@ export function Project({ project }) {
               Sales Rep
             </dt>
             <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
-              {show(project?.i360__Sale_Rep__c)}
+              {show(
+                project.legacy === true
+                  ? project.Sales_Rep__c
+                  : project?.i360__Sale_Rep__c
+              )}
             </dd>
           </div>
           <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
@@ -134,38 +149,44 @@ export function Project({ project }) {
                 )}
                 {hasProducts && (
                   <ul className="border border-gray-200 rounded-md">
-                    {project?.Roofing_Product_Color__c && (
+                    {(project as ExtendedProject)?.Roofing_Product_Color__c && (
                       <li className="pl-3 pr-4 py-3 flex items-center justify-between text-sm leading-5">
                         <div className="w-0 flex-1 md:flex items-center">
                           <h2 className="font-bold md:w-32 text-gray-500">
                             Roofing Color
                           </h2>
                           <span className="md:ml-2 flex-1 w-0 truncate">
-                            {show(project?.Roofing_Product_Color__c)}
+                            {show(
+                              (project as ExtendedProject)
+                                ?.Roofing_Product_Color__c
+                            )}
                           </span>
                         </div>
                       </li>
                     )}
-                    {project?.Siding_Product_Color__c && (
+                    {(project as ExtendedProject)?.Siding_Product_Color__c && (
                       <li className="pl-3 pr-4 py-3 flex items-center justify-between text-sm leading-5">
                         <div className="w-0 flex-1 md:flex items-center">
                           <h2 className="font-bold md:w-32 text-gray-500">
                             Siding Color
                           </h2>
                           <span className="md:ml-2 flex-1 w-0 truncate">
-                            {show(project?.Siding_Product_Color__c)}
+                            {show(
+                              (project as ExtendedProject)
+                                ?.Siding_Product_Color__c
+                            )}
                           </span>
                         </div>
                       </li>
                     )}
-                    {project?.Trim_Color__c && (
+                    {(project as ExtendedProject)?.Trim_Color__c && (
                       <li className="pl-3 pr-4 py-3 flex items-center justify-between text-sm leading-5">
                         <div className="w-0 flex-1 md:flex items-center">
                           <h2 className="font-bold md:w-32 text-gray-500">
                             Windows Color
                           </h2>
                           <span className="md:ml-2 flex-1 w-0 truncate">
-                            {show(project?.Trim_Color__c)}
+                            {show((project as ExtendedProject)?.Trim_Color__c)}
                           </span>
                         </div>
                       </li>

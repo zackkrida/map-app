@@ -23,13 +23,29 @@ interface Project {
   Latitude__c: string
 }
 
+interface ExtendedProject extends Project {
+  Roofing_Product_Color__c: string
+  Siding_Product_Color__c: string
+  Trim_Color__c: string
+  i360__Sale_Rep__c: string
+}
+
 interface LegacyProject {
   legacy: true
   Id: string
   i360__Correspondence_Name__c: string
   i360__Longitude__c: number
   i360__Latitude__c: number
+  i360__Home_Address__c: string
+  i360__Home_Address__c: string
+  i360__Home_City__c: string
+  i360__Home_State__c: string
+  i360__Home_Zip_Postal_Code__c: string
   Legacy_Sold_On_Date__c: string
+}
+
+interface ExtendedLegacyProject extends LegacyProject {
+  Sales_Rep__c: string
 }
 
 interface BaseMarkerProps {

@@ -5,7 +5,10 @@ export default async function Project(req, res) {
 
   try {
     const t60 = await connectTo360()
-    const project = await t60.sobject('i360__Project__c').findOne({ Id: id })
+    const project: Project = await t60
+      .sobject('i360__Project__c')
+      .findOne({ Id: id })
+    project.legacy = false
 
     res.json(project)
   } catch (error) {
