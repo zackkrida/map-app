@@ -6,7 +6,6 @@ import {
   ComboboxOptionText,
   ComboboxPopover,
 } from '@reach/combobox'
-import { Menu, MenuButton, MenuItem, MenuList } from '@reach/menu-button'
 import {
   badUnique,
   downloadBlob,
@@ -107,7 +106,7 @@ export function Layout({ children }: LayoutProps) {
 
   useEffect(() => {
     let nq = ''
-    let ntype = ''
+    let ntype = types[0].value
     let nfilters = baseFilters
 
     // set filters from query params on mount
@@ -126,6 +125,7 @@ export function Layout({ children }: LayoutProps) {
         }
       }
     }
+
     setNSearch({ nq, ntype, nfilters })
   }, [])
 
