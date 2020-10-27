@@ -1,5 +1,6 @@
 {
   "name": "marshall-map-app",
+  "license": "MIT",
   "version": "1.0.0",
   "scripts": {
     "dev": "next",
