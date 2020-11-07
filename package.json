@@ -24,6 +24,7 @@
     "react": "^17.0.1",
     "react-cool-dimensions": "^1.1.8",
     "react-dom": "^17.0.1",
+    "react-google-places-autocomplete": "^3.0.0",
     "react-loading-skeleton": "^2.1.1",
     "react-virtual": "^2.2.7",
     "react-window": "^1.8.5",
