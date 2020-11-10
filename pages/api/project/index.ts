@@ -72,6 +72,7 @@ async function Projects(req, res) {
     includeLegacy = false
   }
 
+  filters.i360__Status__c = { $ne: 'Canceled' }
   filters.i360__Appointment_State__c = { $in: ['RI', 'MA', 'CT'] }
   filters.i360__Appointment_Latitude__c = { $gt: 40, $lt: 43 }
   filters.i360__Appointment_Longitude__c = { $lt: -69, $gt: -72 }

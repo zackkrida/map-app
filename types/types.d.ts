@@ -30,6 +30,7 @@ interface ExtendedProject extends Project {
   Trim_Color__c: string
   i360__Sale_Rep__c: string
   i360__Job_Type_formatted__c: string
+  i360__Status__c: string
 }
 
 interface LegacyProject {
