@@ -27,6 +27,9 @@ module.exports = {
   },
   theme: {
     extend: {
+      screens: {
+        md: '766px',
+      },
       colors: {
         'brand-orange': '#e6ac5c',
         'brand-navy': '#192837',
