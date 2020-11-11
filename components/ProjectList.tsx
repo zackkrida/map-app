@@ -15,7 +15,7 @@ export function ProjectList({
     width: listWrapperWidth,
     height: listWrapperHeight,
   } = useDimensions<HTMLDivElement>({})
-  const isLarge = useMediaQuery('(min-width: 768px')
+  const isLarge = useMediaQuery('(min-width: 766px')
   const projectItemData = useMemo(() => {
     return projects.map(project => ({ project }))
   }, [projects])
