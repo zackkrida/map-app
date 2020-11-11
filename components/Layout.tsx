@@ -73,12 +73,23 @@ export function Layout({ children }: LayoutProps) {
   }, [advancedType])
 
   function getCurrentAddress() {
-    if (userLatLng.lat === null) {
+    if (userLatLng.lat === null && mapRef.current) {
       navigator.geolocation.getCurrentPosition(
         position => {
-          setUserLatLng({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
+          let lat = position.coords.latitude
+          let lng = position.coords.longitude
+          setUserLatLng({ lat, lng })
+
+          let geocoder = new window.google.maps.Geocoder()
+          geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+            if (status == google.maps.GeocoderStatus.OK) {
+              console.log(results[0])
+              setProximityQuery(results[0].formatted_address)
+            } else {
+              console.error(
+                'Geocode was not successful for the following reason: ' + status
+              )
+            }
           })
         },
         error => {
@@ -88,23 +99,6 @@ export function Layout({ children }: LayoutProps) {
       )
     }
   }
-
-  // Set the current address with the geocode API
-  useEffect(() => {
-    if (userLatLng.lat !== null && mapRef.current) {
-      let geocoder = new window.google.maps.Geocoder()
-      geocoder.geocode({ location: userLatLng }, function (results, status) {
-        if (status == google.maps.GeocoderStatus.OK) {
-          console.log(results[0])
-          setProximityQuery(results[0].formatted_address)
-        } else {
-          console.error(
-            'Geocode was not successful for the following reason: ' + status
-          )
-        }
-      })
-    }
-  }, [userLatLng, mapsRef])
 
   const setNSearch = ({ nq, ntype, nfilters }) => {
     setQ(nq)
