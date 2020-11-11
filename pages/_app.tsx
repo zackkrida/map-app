@@ -2,6 +2,7 @@ import '../styles/index.css'
 import '@reach/dialog/styles.css'
 import '@reach/combobox/styles.css'
 import '@reach/menu-button/styles.css'
+import '@reach/tooltip/styles.css'
 
 import { Layout } from 'components/Layout'
 

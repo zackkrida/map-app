@@ -4,7 +4,8 @@
 
 This is an application to show completed and in-progress jobs from Marshall Building & Remodeling. Requires authentication via password to view customer data and jobs.
 
-Built with TypeScript, React, Tailwind CSS and Next.js.
+Built with TypeScript, React, Tailwind CSS and Next.js. Also integrates with ImproveIt360 (Salesforce) and Google Maps APIs (places, maps, geocode).
+
 
 ## Running Locally
 

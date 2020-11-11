@@ -1,6 +1,6 @@
 import GoogleMap from 'google-map-react'
 import { getLat, getLng, getMapBoundsFromProjects } from 'lib/utils'
-import React, { useMemo, useRef, useState, useEffect } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import useSupercluster from 'use-supercluster'
 import { getMarkerColor, Marker, RawMarker } from './Marker'
 
@@ -18,16 +18,19 @@ const mapSettings = {
 }
 
 export function CustomMap({
+  refs: { mapRef, mapsRef },
   projects = [],
   activeItem,
   setActiveItem,
 }: {
+  refs: {
+    mapRef: React.MutableRefObject<google.maps.Map>
+    mapsRef: React.MutableRefObject<HTMLElement>
+  }
   projects: ProjectResultList
   activeItem: string
   setActiveItem: (value: string) => void
 }) {
-  const mapRef = useRef<google.maps.Map>(null!)
-  const mapsRef = useRef<HTMLElement>(null!)
   const [bounds, setBounds] = useState(null)
   const [zoom, setZoom] = useState(mapSettings.zoom)
 
@@ -80,7 +83,7 @@ export function CustomMap({
         maxZoom: mapSettings.maxZoom,
         zoomControlOptions: { position: 4 },
       }}
-      bootstrapURLKeys={{ key }}
+      bootstrapURLKeys={{ key, libraries: ['places'] }}
       yesIWantToUseGoogleMapApiInternals
       onGoogleApiLoaded={({ map, maps }) => {
         mapRef.current = map
