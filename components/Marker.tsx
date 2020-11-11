@@ -7,12 +7,13 @@ export function Marker({
   lat,
   lng,
   color,
+  onClick,
   ...props
 }: Omit<CustomMarkerProps, 'children'>) {
   return (
     <RawMarker lat={lat} lng={lng}>
       <div
-        {...props}
+        onClick={onClick}
         className={`Marker ${color} block w-8 h-8 hover:scale-110 duration-75 ease-in-out transform -translate-y-1/2 -translate-x-1/2 cursor-pointer origin-bottom ${
           active ? `'scale-125 z-10` : ''
         }`}

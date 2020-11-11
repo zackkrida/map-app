@@ -1,3 +1,5 @@
+import { getLat, getLng } from 'lib/utils'
+
 /**
  * Functions to work with milage comparisons of Lat/Lng Values.
  * Modified from this Gist: https://gist.github.com/SimonJThompson/c9d01f0feeb95b18c7b0
@@ -25,8 +27,14 @@ const haversine = (l1: LatLng, l2: LatLng) => {
   return d
 }
 
-const within = (milesFrom: number, location: LatLng) => (comparison: LatLng) =>
-  kmToMiles(haversine(location, comparison)) <= milesFrom
+const projectToLatLng = (project: Project | LegacyProject) => ({
+  lat: getLat(project),
+  lng: getLng(project),
+})
+
+const within = (milesFrom: number, location: LatLng) => (
+  comparison: Project | LegacyProject
+) => kmToMiles(haversine(location, projectToLatLng(comparison))) <= milesFrom
 
 /**
  * Check every address is within range of the initial address
@@ -40,7 +48,7 @@ const within = (milesFrom: number, location: LatLng) => (comparison: LatLng) =>
  * ```
  */
 export const withinXMilesOf = (address: LatLng) => (milesFrom: number) => (
-  addresses: LatLng[]
+  addresses: ProjectResultList
 ) => addresses.filter(within(milesFrom, address))
 
 interface LatLng {

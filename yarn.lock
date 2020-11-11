@@ -1418,6 +1418,19 @@
     prop-types "^15.7.2"
     tslib "^2.0.0"
 
+"@reach/tooltip@^0.11.2":
+  version "0.11.2"
+  resolved "https://registry.yarnpkg.com/@reach/tooltip/-/tooltip-0.11.2.tgz#db5c11fa72995801baac157db46f5bb6cacd494b"
+  integrity sha512-aTi3aLkRZMHrNiHt84vnyTWNj84rPdGYkxAfaFpxgkaKpos3XmaOPiR+n/3YzQUoJXISuw8mZezcrDtsSpr3aA==
+  dependencies:
+    "@reach/auto-id" "0.11.2"
+    "@reach/portal" "0.11.2"
+    "@reach/rect" "0.11.2"
+    "@reach/utils" "0.11.2"
+    "@reach/visually-hidden" "0.11.1"
+    prop-types "^15.7.2"
+    tslib "^2.0.0"
+
 "@reach/utils@0.11.2":
   version "0.11.2"
   resolved "https://registry.yarnpkg.com/@reach/utils/-/utils-0.11.2.tgz"
@@ -1426,6 +1439,13 @@
     "@types/warning" "^3.0.0"
     tslib "^2.0.0"
     warning "^4.0.3"
+
+"@reach/visually-hidden@0.11.1":
+  version "0.11.1"
+  resolved "https://registry.yarnpkg.com/@reach/visually-hidden/-/visually-hidden-0.11.1.tgz#3d7a5742acf18372f35b9e216680edd8073f35e3"
+  integrity sha512-TZZNSttor2jG6ZPGI35s/8G0FNSz49QrJIhAZbnUqHyPf3+jtNqAC0dOWW8Nuk+mApDDDVYd2KZ9P2vnzllNnQ==
+  dependencies:
+    tslib "^2.0.0"
 
 "@tailwindcss/custom-forms@^0.2.1":
   version "0.2.1"

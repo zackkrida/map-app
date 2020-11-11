@@ -48,10 +48,6 @@ body {
 }
 
 [data-reach-listbox-popover] {
-  z-index: 20;
-}
-
-[data-reach-listbox-popover] {
   padding: 0;
   border: none;
 }
@@ -71,6 +67,12 @@ body {
 
 [data-reach-menu-items] {
   padding: 0 !important;
+}
+
+[data-reach-listbox-popover],
+/* prettier-ignore-next-line */
+[id^="tooltip"] {
+  z-index: 20 !important;
 }
 
 @tailwind utilities;

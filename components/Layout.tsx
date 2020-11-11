@@ -2,18 +2,24 @@ import { LoginModal } from './LoginModal'
 import {
   downloadBlob,
   getAddressString,
+  getLat,
+  getLng,
   postFetcher,
   removeAnys,
 } from 'lib/utils'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { Logo } from './Logo'
 import { CustomMap } from './CustomMap'
 import { DropdownButton } from './DropdownButton'
 import { InfoModal } from './InfoModal'
 import { ProjectList } from './ProjectList'
 import { Filters } from './Filters'
+import { ProximityInput } from './ProximityInput'
+import Tooltip from '@reach/tooltip'
+import { withinXMilesOf } from 'lib/haversine'
+import { LatLng } from '@googlemaps/google-maps-services-js'
 
 const baseFilters = {
   year: 'any',
@@ -30,6 +36,9 @@ const miles = [
 ]
 
 export function Layout({ children }: LayoutProps) {
+  const mapRef = useRef<google.maps.Map>(null!)
+  const mapsRef = useRef<HTMLElement>(null!)
+
   const router = useRouter()
   const [unauthenticated, setUnauthenticated] = useState(false)
   const [projects, setProjects] = useState<ProjectResultList>([])
@@ -41,13 +50,17 @@ export function Layout({ children }: LayoutProps) {
     { value: 'streetAddress', name: 'Street Address' },
   ]
   const [q, setQ] = useState('')
+  const [proximityQuery, setProximityQuery] = useState('')
+  const [proximityMiles, setProximityMiles] = useState(miles[0].value)
   const [showFilters, setShowFilters] = useState(false)
   const [advancedType, setAdvancedType] = useState<string>(null)
   const [searchCount, setSearchCount] = useState(0)
   const [resultsLoading, setResultsLoading] = useState(false)
   const [activeItem, setActiveItem] = useState<string>(null)
   const [filters, setFilters] = useState(baseFilters)
-  const [userLocation, setUserLocation] = useState({ lat: null, lng: null })
+  const [userLatLng, setUserLatLng] = useState<
+    google.maps.LatLng | google.maps.LatLngLiteral
+  >({ lat: null, lng: null })
 
   useEffect(() => {
     if (advancedType !== null) {
@@ -56,16 +69,36 @@ export function Layout({ children }: LayoutProps) {
     }
   }, [advancedType])
 
+  function getCurrentAddress() {
+    if (userLatLng.lat === null) {
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          setUserLatLng({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          })
+        },
+        () => {},
+        { enableHighAccuracy: true }
+      )
+    }
+  }
+
+  // Set the current address with the geocode API
   useEffect(() => {
-    navigator.geolocation.getCurrentPosition(position => {
-      setUserLocation({
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
+    if (userLatLng.lat !== null && mapRef.current) {
+      let geocoder = new window.google.maps.Geocoder()
+      geocoder.geocode({ location: userLatLng }, function (results, status) {
+        if (status == google.maps.GeocoderStatus.OK) {
+          setProximityQuery(results[0].formatted_address)
+        } else {
+          console.error(
+            'Geocode was not successful for the following reason: ' + status
+          )
+        }
       })
-      console.log('Latitude is :', position.coords.latitude)
-      console.log('Longitude is :', position.coords.longitude)
-    })
-  }, [])
+    }
+  }, [userLatLng, mapsRef])
 
   const setNSearch = ({ nq, ntype, nfilters }) => {
     setQ(nq)
@@ -92,12 +125,45 @@ export function Layout({ children }: LayoutProps) {
     setResultsLoading(true)
 
     try {
-      let projects = await postFetcher(`/api/project`, {
+      let projects: ProjectResultList = await postFetcher(`/api/project`, {
         q: nq,
         type: ntype,
         ...nfilters,
       })
-      setProjects(projects)
+
+      if (searchMode === SearchModes.Proximity) {
+        if (mapsRef.current) {
+          let geocoder = new window.google.maps.Geocoder()
+          geocoder.geocode({ address: proximityQuery }, function (
+            results,
+            status
+          ) {
+            if (status !== google.maps.GeocoderStatus.OK) {
+              console.error(
+                'Geocode was not successful for the following reason: ' + status
+              )
+              return
+            }
+
+            let referenceLatLng = {
+              lat: results[0].geometry.location.lat(),
+              lng: results[0].geometry.location.lng(),
+            }
+
+            let projs = withinXMilesOf(referenceLatLng)(proximityMiles)(
+              projects
+            )
+
+            setProjects(projs)
+          })
+        }
+
+        setProjects([])
+
+        // filter by geolocation now, wowzers.
+      } else {
+        setProjects(projects)
+      }
     } catch (error) {
       if (error.message === 'User is not authenticated') {
         setUnauthenticated(true)
@@ -174,6 +240,7 @@ export function Layout({ children }: LayoutProps) {
         <div className="relative md:absolute w-full flex-grow md:h-screen">
           <div className="absolute h-full min-h-full w-full">
             <CustomMap
+              refs={{ mapRef, mapsRef }}
               projects={projects}
               activeItem={activeItem}
               setActiveItem={setActiveItem}
@@ -203,8 +270,6 @@ export function Layout({ children }: LayoutProps) {
                         className="w-full block mx-auto bg-white text-brand-navy font-semibold px-2 py-2 rounded-md border-white border border-opacity-0 items-center text-sm focus:outline-none focus:border-opacity-100 focus:shadow-md focus:bg-opacity-100 focus:text-brand-blue hover:border-opacity-100 hover:shadow-md hover:bg-opacity-100 hover:text-brand-blue transition-bg duration-100 ease-in-out"
                       >
                         Search Nearby
-                        <br />
-                        <span className="text-xs">(or enter address)</span>
                       </button>
                       <button
                         onClick={() =>
@@ -220,24 +285,38 @@ export function Layout({ children }: LayoutProps) {
                 )}
                 {searchMode === SearchModes.Proximity && (
                   <div className="mx-2 flex md:rounded-md shadow-sm relative rounded-none rounded-l-md transition duration-150 ease-in-out sm:text-sm sm:leading-5 text-brand-navy">
-                    <input
-                      type="text"
-                      placeholder={
-                        userLocation.lat && userLocation.lng
-                          ? 'Using Current Location'
-                          : 'Allow location access or enter an address'
-                      }
-                      className="flex-1 block w-full form-input pr-28 placeholder-cool-gray-500 text-brand-navy"
+                    <ProximityInput
+                      mapsRef={mapsRef}
+                      value={proximityQuery}
+                      setValue={setProximityQuery}
+                      placeholder={'Enter an address'}
+                      className="flex-1 block w-full form-input pr-28 placeholder-cool-gray-300 text-brand-navy"
                     />
 
                     <div className="absolute inset-y-0 right-0 flex items-center">
+                      <Tooltip label="Use current location">
+                        <button
+                          type="button"
+                          className="appearance-none p-2"
+                          onClick={getCurrentAddress}
+                        >
+                          <svg
+                            className="w-4 h-4 text-gray-300 fill-current cursor-pointer"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 477.883 477.883"
+                          >
+                            <path d="M468.456 1.808a17.063 17.063 0 00-15.289 0L9.433 223.675c-8.429 4.219-11.842 14.471-7.624 22.9a17.065 17.065 0 0012.197 9.151l176.111 32.034 32.034 176.111a17.066 17.066 0 0014.353 13.841c.803.116 1.613.173 2.423.171a17.067 17.067 0 0015.275-9.438L476.07 24.711c4.222-8.427.813-18.681-7.614-22.903z" />
+                          </svg>
+                        </button>
+                      </Tooltip>
+
                       <select
-                        aria-label="Search Type"
-                        value={advancedType}
+                        aria-label="Miles Radius"
+                        value={proximityMiles}
                         onChange={event => {
-                          setAdvancedType(event.target.value)
+                          setProximityMiles(Number(event.target.value))
                         }}
-                        className="form-select h-full py-0 pl-2 pr-7 border-transparent bg-transparent text-gray-500 sm:text-sm sm:leading-5 rounded-r-md rounded-l-none bg-blue-100 border-l border-blue-200"
+                        className="ml-2 form-select h-full py-0 pl-2 pr-7 border-transparent bg-transparent text-gray-500 sm:text-sm sm:leading-5 rounded-r-md rounded-l-none bg-blue-100 border-l border-blue-200"
                       >
                         {miles.map(mile => (
                           <option key={mile.name} value={mile.value}>
