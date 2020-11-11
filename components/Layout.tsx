@@ -79,7 +79,7 @@ export function Layout({ children }: LayoutProps) {
           })
         },
         error => {
-          console.error(error.message)
+          console.error(error)
         },
         { enableHighAccuracy: true }
       )
