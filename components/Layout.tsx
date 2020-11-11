@@ -294,21 +294,42 @@ export function Layout({ children }: LayoutProps) {
                     />
 
                     <div className="absolute inset-y-0 right-0 flex items-center">
-                      <Tooltip label="Use current location">
+                      {proximityQuery === '' ? (
+                        <Tooltip label="Use current location">
+                          <button
+                            type="button"
+                            className="appearance-none p-2"
+                            onClick={getCurrentAddress}
+                          >
+                            <svg
+                              className="w-4 h-4 text-gray-300 fill-current cursor-pointer"
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 477.883 477.883"
+                            >
+                              <path d="M468.456 1.808a17.063 17.063 0 00-15.289 0L9.433 223.675c-8.429 4.219-11.842 14.471-7.624 22.9a17.065 17.065 0 0012.197 9.151l176.111 32.034 32.034 176.111a17.066 17.066 0 0014.353 13.841c.803.116 1.613.173 2.423.171a17.067 17.067 0 0015.275-9.438L476.07 24.711c4.222-8.427.813-18.681-7.614-22.903z" />
+                            </svg>
+                          </button>
+                        </Tooltip>
+                      ) : (
                         <button
                           type="button"
                           className="appearance-none p-2"
-                          onClick={getCurrentAddress}
+                          onClick={() => setProximityQuery('')}
                         >
                           <svg
-                            className="w-4 h-4 text-gray-300 fill-current cursor-pointer"
                             xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 477.883 477.883"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            className="w-4 h-4 text-gray-300 fill-current cursor-pointer"
                           >
-                            <path d="M468.456 1.808a17.063 17.063 0 00-15.289 0L9.433 223.675c-8.429 4.219-11.842 14.471-7.624 22.9a17.065 17.065 0 0012.197 9.151l176.111 32.034 32.034 176.111a17.066 17.066 0 0014.353 13.841c.803.116 1.613.173 2.423.171a17.067 17.067 0 0015.275-9.438L476.07 24.711c4.222-8.427.813-18.681-7.614-22.903z" />
+                            <path
+                              fill-rule="evenodd"
+                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                              clip-rule="evenodd"
+                            />
                           </svg>
                         </button>
-                      </Tooltip>
+                      )}
 
                       <select
                         aria-label="Miles Radius"
