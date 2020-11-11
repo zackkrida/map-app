@@ -290,7 +290,7 @@ export function Layout({ children }: LayoutProps) {
                       value={proximityQuery}
                       setValue={setProximityQuery}
                       placeholder={'Enter an address'}
-                      className="flex-1 block w-full form-input pr-28 placeholder-cool-gray-300 text-brand-navy"
+                      className="flex-1 block w-full form-input pr-36 placeholder-cool-gray-300 text-brand-navy"
                     />
 
                     <div className="absolute inset-y-0 right-0 flex items-center">
