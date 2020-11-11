@@ -54,7 +54,7 @@ export function Layout({ children }: LayoutProps) {
   ]
   const [q, setQ] = useState('')
   const [proximityQuery, setProximityQuery] = useState('')
-  const [proximityMiles, setProximityMiles] = useState(miles[0].value)
+  const [proximityMiles, setProximityMiles] = useState(miles[2].value)
   const [showFilters, setShowFilters] = useState(false)
   const [advancedType, setAdvancedType] = useState<string>(null)
   const [searchCount, setSearchCount] = useState(0)
