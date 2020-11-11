@@ -78,7 +78,9 @@ export function Layout({ children }: LayoutProps) {
             lng: position.coords.longitude,
           })
         },
-        () => {},
+        error => {
+          console.error(error.message)
+        },
         { enableHighAccuracy: true }
       )
     }
@@ -90,6 +92,7 @@ export function Layout({ children }: LayoutProps) {
       let geocoder = new window.google.maps.Geocoder()
       geocoder.geocode({ location: userLatLng }, function (results, status) {
         if (status == google.maps.GeocoderStatus.OK) {
+          console.log(results[0])
           setProximityQuery(results[0].formatted_address)
         } else {
           console.error(
