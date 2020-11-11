@@ -29,6 +29,9 @@ const baseFilters = {
 }
 
 const miles = [
+  { value: 0.5, name: 'Half Mile' },
+  { value: 1, name: '1 Mile' },
+  { value: 2, name: '2 Miles' },
   { value: 5, name: '5 Miles' },
   { value: 10, name: '10 Miles' },
   { value: 50, name: '50 Miles' },
