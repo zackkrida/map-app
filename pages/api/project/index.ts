@@ -8,7 +8,7 @@ async function Projects(req, res) {
     return
   }
 
-  const filters: Partial<{ [key in keyof ExtendedProject | '$or']: any }> = {}
+  const filters: Partial<{ [key in keyof ExtendedProject | '$or']: {} }> = {}
   const legacyFilters: Partial<
     { [key in keyof ExtendedLegacyProject]: {} }
   > = {}
@@ -135,8 +135,6 @@ async function Projects(req, res) {
           })
         )
     }
-
-    console.log(legacyProjects[0])
 
     res.json([...projects, ...legacyProjects])
   } catch (error) {

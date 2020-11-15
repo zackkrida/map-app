@@ -67,7 +67,6 @@ export function Layout({ children }: LayoutProps) {
 
   useEffect(() => {
     if (advancedType !== null) {
-      console.info(advancedType)
       setSearchMode(SearchModes.AdvancedSearch)
     }
   }, [advancedType])
@@ -83,7 +82,6 @@ export function Layout({ children }: LayoutProps) {
           let geocoder = new window.google.maps.Geocoder()
           geocoder.geocode({ location: { lat, lng } }, (results, status) => {
             if (status == google.maps.GeocoderStatus.OK) {
-              console.log(results[0])
               setProximityQuery(results[0].formatted_address)
             } else {
               console.error(
@@ -323,9 +321,9 @@ export function Layout({ children }: LayoutProps) {
                             className="w-4 h-4 text-gray-300 fill-current cursor-pointer"
                           >
                             <path
-                              fill-rule="evenodd"
+                              fillRule="evenodd"
                               d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                              clip-rule="evenodd"
+                              clipRule="evenodd"
                             />
                           </svg>
                         </button>

@@ -9,22 +9,22 @@ const toRad = (v: number) => (v * Math.PI) / 180
 const kmToMiles = (km: number) => Number((km * 0.62137).toFixed(2))
 
 const haversine = (l1: LatLng, l2: LatLng) => {
-  var R = 6371 // km
+  const EARTH_RADIUS = 6371
+  const [x1, x2] = [l2.lat - l1.lat, l2.lng - l1.lng]
+  const [dLat, dLon] = [toRad(x1), toRad(x2)]
 
-  var x1 = l2.lat - l1.lat
-  var dLat = toRad(x1)
-  var x2 = l2.lng - l1.lng
-  var dLon = toRad(x2)
-  var a =
+  // @todo: Learn what the actual maths are here lol
+  const magic =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRad(l1.lat)) *
       Math.cos(toRad(l2.lat)) *
       Math.sin(dLon / 2) *
       Math.sin(dLon / 2)
-  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-  var d = R * c
 
-  return d
+  const circumfrence = 2 * Math.atan2(Math.sqrt(magic), Math.sqrt(1 - magic))
+  const distanceInKm = EARTH_RADIUS * circumfrence
+
+  return distanceInKm
 }
 
 const projectToLatLng = (project: Project | LegacyProject) => ({

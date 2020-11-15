@@ -56,7 +56,7 @@ export function onlyUnique(value, index, self) {
 const badObjEq = (one: {}) => (two: {}) =>
   JSON.stringify(one) === JSON.stringify(two)
 
-export const badUnique = (arr: any[]) => {
+export const badUnique = (arr: unknown[]) => {
   const results = []
   arr.map(item => {
     if (!results.some(badObjEq(item))) {

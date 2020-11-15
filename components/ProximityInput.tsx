@@ -20,7 +20,6 @@ export function ProximityInput({
     const addressObject = autoCompleteInstanceRef.current.getPlace()
     const query = addressObject.formatted_address
     updateQuery(query)
-    console.log(addressObject)
   }
 
   useEffect(() => {
