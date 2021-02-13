@@ -1,5 +1,12 @@
 import { connectTo360 } from 'lib/three60'
 import { withAuth } from 'lib/session'
+import {
+  ExtendedProject,
+  ExtendedLegacyProject,
+  Project,
+  LegacyProject,
+  ProjectFields,
+} from 'types/types'
 const { SfDate } = require('jsforce')
 
 async function Projects(req, res) {

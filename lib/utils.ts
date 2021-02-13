@@ -1,4 +1,5 @@
 import { ProductColors } from 'types/colors'
+import { ProjectResult, ProjectResultList } from 'types/types'
 
 export const getLat = (i: ProjectResult) =>
   i.legacy === true ? i.i360__Latitude__c : i.i360__Appointment_Latitude__c

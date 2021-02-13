@@ -1,4 +1,5 @@
 import { getLat, getLng } from 'lib/utils'
+import { ProjectResult, ProjectResultList } from 'types/types'
 
 /**
  * Functions to work with milage comparisons of Lat/Lng Values.

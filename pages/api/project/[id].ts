@@ -1,5 +1,6 @@
 import { withAuth } from 'lib/session'
 import { connectTo360 } from 'lib/three60'
+import { Project } from 'types/types'
 
 async function Project(req, res) {
   if (!req.session.get('user')) {

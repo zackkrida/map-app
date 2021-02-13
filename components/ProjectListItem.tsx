@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getAddressString, getBrandColor, prettyDate } from 'lib/utils'
 import { ReactEventHandler } from 'react'
+import { ProjectResult } from 'types/types'
 
 export function ProjectListItem({
   onClick,

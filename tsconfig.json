@@ -1,10 +1,16 @@
 {
   "compilerOptions": {
     "alwaysStrict": true,
-    "types": ["googlemaps"],
-    "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "types": [
+      "googlemaps"
+    ],
     "baseUrl": ".",
+    "target": "es5",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
@@ -17,6 +23,13 @@
     "isolatedModules": true,
     "jsx": "preserve"
   },
-  "exclude": ["node_modules"],
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "types/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

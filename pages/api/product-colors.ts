@@ -1,5 +1,6 @@
 import { withAuth } from 'lib/session'
 import { connectTo360 } from 'lib/three60'
+import { ExtendedProject, ProjectFields } from 'types/types'
 
 enum ProductTypes {
   Roofing_Product_Color__c = 'roofing',

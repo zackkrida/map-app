@@ -1,6 +1,7 @@
 import { withAuth } from 'lib/session'
 import { connectTo360 } from 'lib/three60'
 import { setAllLegacy } from 'lib/utils'
+import { LegacyProject, ProjectFields, ThreeSixty } from 'types/types'
 
 async function Jobs(req, res) {
   if (!req.session.get('user')) {

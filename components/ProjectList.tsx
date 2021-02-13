@@ -3,6 +3,7 @@ import { FixedSizeList } from 'react-window'
 import { Row } from './Row'
 import useDimensions from 'react-cool-dimensions'
 import { useMediaQuery } from '../lib/useMediaQuery'
+import { ProjectFields, ProjectResultList } from 'types/types'
 
 export function ProjectList({
   projects,
@@ -53,5 +54,5 @@ export function ProjectList({
 interface ProjectListProps {
   projects: ProjectResultList
   activeItem: string | undefined
-  setActiveItem: (ProjectId: Project['Id']) => void
+  setActiveItem: (ProjectId: ProjectFields.id) => void
 }

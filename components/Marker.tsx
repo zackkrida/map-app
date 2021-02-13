@@ -1,4 +1,5 @@
 import { StatusColor } from 'types/colors'
+import { BaseMarkerProps, CustomMarkerProps, ProjectResult } from 'types/types'
 
 export const RawMarker = ({ children, ...props }: BaseMarkerProps) => children
 

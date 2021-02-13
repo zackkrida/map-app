@@ -20,6 +20,7 @@ import { ProximityInput } from './ProximityInput'
 import Tooltip from '@reach/tooltip'
 import { withinXMilesOf } from 'lib/haversine'
 import { LatLng } from '@googlemaps/google-maps-services-js'
+import { LayoutProps, ProjectResultList, Project } from 'types/types'
 
 const baseFilters = {
   year: 'any',

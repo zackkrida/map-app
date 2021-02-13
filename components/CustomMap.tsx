@@ -1,6 +1,7 @@
 import GoogleMap from 'google-map-react'
 import { getLat, getLng, getMapBoundsFromProjects } from 'lib/utils'
 import React, { useMemo, useState, useEffect } from 'react'
+import { ProjectResultList } from 'types/types'
 import useSupercluster from 'use-supercluster'
 import { getMarkerColor, Marker, RawMarker } from './Marker'
 

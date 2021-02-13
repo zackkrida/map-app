@@ -1,4 +1,5 @@
 import React from 'react'
+import { Project } from 'types/types'
 import { ProjectListItem } from '../components/ProjectListItem'
 
 export const Row = ({

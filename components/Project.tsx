@@ -2,12 +2,9 @@ import Skeleton from 'react-loading-skeleton'
 import { useRouter } from 'next/router'
 import { getAddressString, getBrandColor, prettyDate } from 'lib/utils'
 import { Logo } from './Logo'
+import { ExtendedProject, ExtendedProjectResult } from 'types/types'
 
-export function Project({
-  project,
-}: {
-  project: ExtendedProject | ExtendedLegacyProject
-}) {
+export function Project({ project }: { project: ExtendedProjectResult }) {
   const router = useRouter()
   const loading = typeof project === 'undefined'
   const isLegacy = project?.legacy === true
