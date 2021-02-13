@@ -13,9 +13,9 @@ async function ProductColors(_, res) {
     const projects = await t60
       .sobject<ExtendedProject>('i360__Project__c')
       .select([
-        'Roofing_Product_Color__c',
-        'Siding_Product_Color__c',
-        'Trim_Color__c',
+        ProjectFields.roofingProductColor,
+        ProjectFields.sidingProductColor,
+        ProjectFields.trimColor,
       ])
       .execute({ autoFetch: true })
 

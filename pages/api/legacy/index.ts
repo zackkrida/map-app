@@ -1,5 +1,6 @@
 import { withAuth } from 'lib/session'
 import { connectTo360 } from 'lib/three60'
+import { setAllLegacy } from 'lib/utils'
 
 async function Jobs(req, res) {
   if (!req.session.get('user')) {
@@ -10,22 +11,17 @@ async function Jobs(req, res) {
   try {
     const t60 = await connectTo360()
     const legacyProjects = await t60
-      .sobject('i360__Prospect__c')
+      .sobject<LegacyProject>(ThreeSixty.LegacyProject)
       .select([
-        'Id',
-        'i360__Correspondence_Name__c',
-        'i360__Longitude__c',
-        'i360__Latitude__c',
-        'Legacy_Sold_On_Date__c',
+        ProjectFields.id,
+        ProjectFields.correspondenceName,
+        ProjectFields.longitude,
+        ProjectFields.latitude,
+        ProjectFields.legacySoldOnDate,
       ])
-      .where({ Legacy_Sold_On_Date__c: { $ne: null } })
+      .where({ [ProjectFields.legacySoldOnDate]: { $ne: null } })
       .execute({ autoFetch: true })
-      .then(res =>
-        res.map(i => {
-          ;(i as any).legacy = true
-          return i
-        })
-      )
+      .then(setAllLegacy(true))
 
     res.json(legacyProjects)
   } catch (error) {

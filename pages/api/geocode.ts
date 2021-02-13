@@ -19,7 +19,7 @@ export default async function Geocode(_, res) {
 
     // prettier-ignore
     const projects = await t60
-      .sobject('i360__Project__c')
+      .sobject(ThreeSixty.Project)
       .select(['*'])
       .where({Latitude__c: null, Long__c: null})
       .maxFetch(200)
@@ -46,7 +46,7 @@ export default async function Geocode(_, res) {
     // const updatedProjects = await Promise.all(projects.map(createUpdateRecord))
 
     const updateIn360Res = await t60
-      .sobject('i360__Project__c')
+      .sobject(ThreeSixty.Project)
       .update(geoResults)
 
     res.json({ projects: projects.length })

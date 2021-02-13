@@ -89,18 +89,18 @@ async function Projects(req, res) {
       projects = await t60
         .sobject<Project>('i360__Project__c')
         .select([
-          'Id',
-          'i360__Correspondence_Name__c',
-          'i360__Appointment_Address__c',
-          'i360__Appointment_City__c',
-          'i360__Appointment_State__c',
-          'i360__Appointment_Zip__c',
-          'i360__Appointment_Latitude__c',
-          'i360__Appointment_Longitude__c',
-          'i360__Completed_On__c',
-          'i360__Job_Type__c',
-          'Long__c',
-          'Latitude__c',
+          ProjectFields.id,
+          ProjectFields.correspondenceName,
+          ProjectFields.appointmentAddress,
+          ProjectFields.appointmentCity,
+          ProjectFields.appointmentState,
+          ProjectFields.appointmentZip,
+          ProjectFields.customLatitude,
+          ProjectFields.customLongitude,
+          ProjectFields.completedOn,
+          ProjectFields.jobType,
+          ProjectFields.appointmentLatitude,
+          ProjectFields.appointmentLongitude,
         ])
         .where(filters)
         .execute({ autoFetch: true })
@@ -116,15 +116,15 @@ async function Projects(req, res) {
       legacyProjects = await t60
         .sobject<LegacyProject>('i360__Prospect__c')
         .select([
-          'Id',
-          'i360__Home_Address__c',
-          'i360__Home_City__c',
-          'i360__Home_State__c',
-          'i360__Home_Zip_Postal_Code__c',
-          'i360__Correspondence_Name__c',
-          'i360__Longitude__c',
-          'i360__Latitude__c',
-          'Legacy_Sold_On_Date__c',
+          ProjectFields.id,
+          ProjectFields.homeAddress,
+          ProjectFields.homeCity,
+          ProjectFields.homeState,
+          ProjectFields.homeZipPostalCode,
+          ProjectFields.correspondenceName,
+          ProjectFields.latitude,
+          ProjectFields.longitude,
+          ProjectFields.legacySoldOnDate,
         ])
         .where(legacyFilters)
         .execute({ autoFetch: true })

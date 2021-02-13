@@ -9,7 +9,7 @@ export function ProjectListItem({
 }: {
   onClick: ReactEventHandler<HTMLDivElement>
   activeItem: string
-  project: Project | LegacyProject
+  project: ProjectResult
 }) {
   const isLegacy = project.legacy === true
   const isActive = activeItem === project.Id

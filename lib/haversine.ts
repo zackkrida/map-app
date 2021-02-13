@@ -27,13 +27,13 @@ const haversine = (l1: LatLng, l2: LatLng) => {
   return distanceInKm
 }
 
-const projectToLatLng = (project: Project | LegacyProject) => ({
+const projectToLatLng = (project: ProjectResult) => ({
   lat: getLat(project),
   lng: getLng(project),
 })
 
 const within = (milesFrom: number, location: LatLng) => (
-  comparison: Project | LegacyProject
+  comparison: ProjectResult
 ) => kmToMiles(haversine(location, projectToLatLng(comparison))) <= milesFrom
 
 /**

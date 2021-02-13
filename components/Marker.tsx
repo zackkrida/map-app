@@ -36,7 +36,7 @@ export function Marker({
   )
 }
 
-export const getMarkerColor = (project: Project | LegacyProject) => {
+export const getMarkerColor = (project: ProjectResult) => {
   if (project.legacy === true) {
     return StatusColor.Legacy
   } else {

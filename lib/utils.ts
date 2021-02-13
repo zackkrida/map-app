@@ -1,9 +1,9 @@
 import { ProductColors } from 'types/colors'
 
-export const getLat = (i: Project | LegacyProject) =>
+export const getLat = (i: ProjectResult) =>
   i.legacy === true ? i.i360__Latitude__c : i.i360__Appointment_Latitude__c
 
-export const getLng = (i: Project | LegacyProject) =>
+export const getLng = (i: ProjectResult) =>
   i.legacy === true ? i.i360__Longitude__c : i.i360__Appointment_Longitude__c
 
 export const scrollTo = (selector: string) => {
@@ -66,7 +66,7 @@ export const badUnique = (arr: unknown[]) => {
   return results
 }
 
-export const getAddressString = (project: Project | LegacyProject) =>
+export const getAddressString = (project: ProjectResult) =>
   project.legacy === true
     ? `${project.i360__Home_Address__c} ${project.i360__Home_City__c}, ${project.i360__Home_State__c} ${project.i360__Home_Zip_Postal_Code__c}`
     : `${project.i360__Appointment_Address__c} ${project.i360__Appointment_City__c}, ${project?.i360__Appointment_State__c} ${project?.i360__Appointment_Zip__c}`
@@ -123,3 +123,11 @@ export function removeAnys(obj) {
   }
   return clean
 }
+
+const setLegacy = (i, value) => {
+  i.legacy = value
+  return i
+}
+
+export const setAllLegacy = (value: Boolean) => (items: ProjectResultList) =>
+  items.map(setLegacy)

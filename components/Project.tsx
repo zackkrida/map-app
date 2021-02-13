@@ -20,7 +20,7 @@ export function Project({
       (project as ExtendedProject)?.Trim_Color__c
 
   return (
-    <div className="bg-white shadow overflow-hidden shadow-md sm:rounded-lg w-full relative">
+    <div className="bg-white overflow-hidden shadow-md sm:rounded-lg w-full relative">
       <button
         onClick={() => router.back()}
         className="absolute left-4 top-4 rounded-full text-white cursor-pointer focus:outline-none focus:shadow-outline-blue"
