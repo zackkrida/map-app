@@ -7,6 +7,7 @@ import {
   LegacyProject,
   ProjectFields,
 } from 'types/types'
+import chunk from 'lodash/chunk'
 
 /**
  * Populate a new legacy_interested_in field from
@@ -46,7 +47,6 @@ const syncLegacyJobs = async (req, res) => {
         LeadSourceFields.prospectId,
         LeadSourceFields.interestedIn,
       ])
-      .limit(API_RESULTS_LIMIT)
       .where({
         [LeadSourceFields.prospectId]: {
           $in: legacyProjects.map(i => i[ProjectFields.id]),
@@ -70,10 +70,11 @@ const syncLegacyJobs = async (req, res) => {
         })
       }
     }
+    const updateChunks = chunk(toUpdate, 200)
 
-    let updateRes = await t60.update(ThreeSixty.LegacyProject, toUpdate)
-
-    console.log(updateRes)
+    await Promise.all(
+      updateChunks.map(i => t60.update(ThreeSixty.LegacyProject, i))
+    )
 
     res.json(toUpdate)
   } catch (error) {
