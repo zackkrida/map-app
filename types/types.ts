@@ -25,6 +25,21 @@ export interface CustomMarkerProps extends BaseMarkerProps {
 export enum ThreeSixty {
   LegacyProject = 'i360__Prospect__c',
   Project = 'i360__Project__c',
+  LeadSource = 'i360__Lead_Source__c',
+}
+
+export enum LeadSourceFields {
+  id = 'Id',
+  interestedIn = 'i360__Components__c',
+  sourceType = 'i360__Source_Type__c',
+  prospectId = 'i360__Prospect_Id__c',
+}
+
+export interface LeadSource {
+  [LeadSourceFields.id]: string
+  [LeadSourceFields.sourceType]: string
+  [LeadSourceFields.prospectId]: string
+  [LeadSourceFields.interestedIn]: string
 }
 
 export enum ProjectFields {
@@ -49,6 +64,7 @@ export enum ProjectFields {
   latitude = 'i360__Latitude__c',
   legacy = 'legacy',
   legacySoldOnDate = 'Legacy_Sold_On_Date__c',
+  legacyInterestedIn = 'Legacy_Interested_In__c',
   longitude = 'i360__Longitude__c',
   roofingProductColor = 'Roofing_Product_Color__c',
   saleRep = 'i360__Sale_Rep__c',
@@ -96,6 +112,7 @@ export interface LegacyProject {
   [ProjectFields.homeState]: string
   [ProjectFields.homeZipPostalCode]: string
   [ProjectFields.legacySoldOnDate]: string
+  [ProjectFields.legacyInterestedIn]: string
 }
 export interface ExtendedLegacyProject extends LegacyProject {
   [ProjectFields.createdDate]: Date
