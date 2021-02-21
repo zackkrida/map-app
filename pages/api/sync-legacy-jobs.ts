@@ -37,7 +37,6 @@ const syncLegacyJobs = async (req, res) => {
         [ProjectFields.legacySoldOnDate]: { $ne: null },
         [ProjectFields.legacyInterestedIn]: { $eq: null },
       })
-      .limit(500)
       .execute({ autoFetch: true })
 
     const leadSources = await t60
