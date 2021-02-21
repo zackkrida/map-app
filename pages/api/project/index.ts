@@ -1,4 +1,4 @@
-import { connectTo360 } from 'lib/three60'
+import { API_RESULTS_LIMIT, connectTo360 } from 'lib/three60'
 import { withAuth } from 'lib/session'
 import {
   ExtendedProject,
@@ -110,6 +110,7 @@ async function Projects(req, res) {
           ProjectFields.appointmentLongitude,
         ])
         .where(filters)
+        .limit(API_RESULTS_LIMIT)
         .execute({ autoFetch: true })
         .then(res =>
           res.map(i => {
@@ -134,6 +135,7 @@ async function Projects(req, res) {
           ProjectFields.legacySoldOnDate,
         ])
         .where(legacyFilters)
+        .limit(API_RESULTS_LIMIT)
         .execute({ autoFetch: true })
         .then(res =>
           res.map(i => {

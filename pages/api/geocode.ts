@@ -1,5 +1,5 @@
 import { connectTo360 } from 'lib/three60'
-import { Client, Status } from '@googlemaps/google-maps-services-js'
+import { Client } from '@googlemaps/google-maps-services-js'
 import chunk from 'lodash/chunk'
 import { ThreeSixty } from 'types/types'
 

@@ -131,4 +131,4 @@ const setLegacy = (i, value) => {
 }
 
 export const setAllLegacy = (value: Boolean) => (items: ProjectResultList) =>
-  items.map(setLegacy)
+  items.map(i => setLegacy(i, value))

@@ -11,6 +11,8 @@ export async function connectTo360() {
   return sf
 }
 
+export const API_RESULTS_LIMIT = Number(process.env.RESULTS_LIMIT) || 10000
+
 const config = {
   url: process.env.THREE_SIXTY_URL,
   email: process.env.THREE_SIXTY_EMAIL,

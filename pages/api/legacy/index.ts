@@ -1,5 +1,5 @@
 import { withAuth } from 'lib/session'
-import { connectTo360 } from 'lib/three60'
+import { connectTo360, API_RESULTS_LIMIT } from 'lib/three60'
 import { setAllLegacy } from 'lib/utils'
 import { LegacyProject, ProjectFields, ThreeSixty } from 'types/types'
 
@@ -21,6 +21,7 @@ async function Jobs(req, res) {
         ProjectFields.legacySoldOnDate,
       ])
       .where({ [ProjectFields.legacySoldOnDate]: { $ne: null } })
+      .limit(API_RESULTS_LIMIT)
       .execute({ autoFetch: true })
       .then(setAllLegacy(true))
 
