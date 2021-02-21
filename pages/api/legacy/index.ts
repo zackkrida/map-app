@@ -19,6 +19,7 @@ async function Jobs(req, res) {
         ProjectFields.longitude,
         ProjectFields.latitude,
         ProjectFields.legacySoldOnDate,
+        ProjectFields.legacyInterestedIn,
       ])
       .where({ [ProjectFields.legacySoldOnDate]: { $ne: null } })
       .limit(API_RESULTS_LIMIT)

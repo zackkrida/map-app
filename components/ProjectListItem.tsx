@@ -1,7 +1,20 @@
 import Link from 'next/link'
 import { getAddressString, getBrandColor, prettyDate } from 'lib/utils'
 import { ReactEventHandler } from 'react'
-import { ProjectResult } from 'types/types'
+import {
+  ExtendedProjectResult,
+  ProjectFields,
+  ProjectResult,
+} from 'types/types'
+
+// @TODO: Move
+export function getJobTypes(project: ProjectResult | ExtendedProjectResult) {
+  if (project?.legacy) {
+    return project?.[ProjectFields.legacyInterestedIn]?.split(';') ?? []
+  } else {
+    return project?.[ProjectFields.jobType]?.split(';') ?? []
+  }
+}
 
 export function ProjectListItem({
   onClick,
@@ -101,18 +114,16 @@ export function ProjectListItem({
                 </div>
               )}
 
-              {project.legacy === false && (
-                <div className="flex text-xs capitalize text-white mt-2 justify-start">
-                  {project?.i360__Job_Type__c?.split(';')?.map(i => (
-                    <div
-                      key={`${project.Id}-${i}`}
-                      className={`mr-1 ${getBrandColor(i)} px-2 rounded-md`}
-                    >
-                      {i}
-                    </div>
-                  ))}
-                </div>
-              )}
+              <div className="flex text-xs capitalize text-white mt-2 justify-start">
+                {getJobTypes(project).map(i => (
+                  <div
+                    key={`${project.Id}-${i}`}
+                    className={`mr-1 ${getBrandColor(i)} px-2 rounded-md`}
+                  >
+                    {i}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
           <div className="hidden md:block">

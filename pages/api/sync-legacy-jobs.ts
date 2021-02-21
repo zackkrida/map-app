@@ -37,6 +37,7 @@ const syncLegacyJobs = async (req, res) => {
         [ProjectFields.legacySoldOnDate]: { $ne: null },
         [ProjectFields.legacyInterestedIn]: { $eq: null },
       })
+      .limit(400)
       .execute({ autoFetch: true })
 
     const leadSources = await t60
@@ -61,7 +62,7 @@ const syncLegacyJobs = async (req, res) => {
     const toUpdate = []
     for (const project of legacyProjects) {
       let match = leadSourcesLookup[project[ProjectFields.id]]
-      if (match) {
+      if (match && match[LeadSourceFields.interestedIn] !== null) {
         toUpdate.push({
           [ProjectFields.id]: project[ProjectFields.id],
           [ProjectFields.legacyInterestedIn]:
@@ -69,13 +70,11 @@ const syncLegacyJobs = async (req, res) => {
         })
       }
     }
-    const updateChunks = chunk(toUpdate, 200)
+    const chunks = chunk(toUpdate, 200)
 
-    await Promise.all(
-      updateChunks.map(i => t60.update(ThreeSixty.LegacyProject, i))
-    )
+    await Promise.all(chunks.map(i => t60.update(ThreeSixty.LegacyProject, i)))
 
-    res.json(toUpdate)
+    res.json(chunks)
   } catch (error) {
     console.error(error)
     res.json({ error: true, message: error.message })

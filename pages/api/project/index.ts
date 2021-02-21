@@ -133,6 +133,7 @@ async function Projects(req, res) {
           ProjectFields.latitude,
           ProjectFields.longitude,
           ProjectFields.legacySoldOnDate,
+          ProjectFields.legacyInterestedIn,
         ])
         .where(legacyFilters)
         .limit(API_RESULTS_LIMIT)

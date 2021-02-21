@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import { getAddressString, getBrandColor, prettyDate } from 'lib/utils'
 import { Logo } from './Logo'
 import { ExtendedProject, ExtendedProjectResult } from 'types/types'
+import { getJobTypes } from './ProjectListItem'
 
 export function Project({ project }: { project: ExtendedProjectResult }) {
   const router = useRouter()
@@ -74,31 +75,27 @@ export function Project({ project }: { project: ExtendedProjectResult }) {
               {show(project && getAddressString(project))}
             </dd>
           </div>
-          {!isLegacy && (
-            <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
-              <dt className="text-sm leading-5 font-medium text-gray-500">
-                Services Included
-              </dt>
-              <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
-                {show(
-                  <div className="flex capitalize text-white mt-2 justify-start">
-                    {(project as ExtendedProject)?.i360__Job_Type__c
-                      .split(';')
-                      .map(i => (
-                        <div
-                          key={`${project.Id}-${i}`}
-                          className={`mr-2 ${getBrandColor(
-                            i
-                          )} px-4 py-2 rounded-md`}
-                        >
-                          {i}
-                        </div>
-                      ))}
-                  </div>
-                )}
-              </dd>
-            </div>
-          )}
+          <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
+            <dt className="text-sm leading-5 font-medium text-gray-500">
+              Services Included
+            </dt>
+            <dd className="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
+              {show(
+                <div className="flex capitalize text-white mt-2 justify-start">
+                  {getJobTypes(project).map(i => (
+                    <div
+                      key={`${project.Id}-${i}`}
+                      className={`mr-2 ${getBrandColor(
+                        i
+                      )} px-4 py-2 rounded-md`}
+                    >
+                      {i}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </dd>
+          </div>
           <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
             <dt className="text-sm leading-5 font-medium text-gray-500">
               Date Completed
