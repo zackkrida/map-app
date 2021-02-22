@@ -22,7 +22,7 @@ async function Jobs(req, res) {
         ProjectFields.legacyInterestedIn,
       ])
       .where({ [ProjectFields.legacySoldOnDate]: { $ne: null } })
-      .limit(API_RESULTS_LIMIT)
+      // .limit(API_RESULTS_LIMIT)
       .execute({ autoFetch: true })
       .then(setAllLegacy(true))
 

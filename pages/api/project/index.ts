@@ -110,7 +110,7 @@ async function Projects(req, res) {
           ProjectFields.appointmentLongitude,
         ])
         .where(filters)
-        .limit(API_RESULTS_LIMIT)
+        // .limit(API_RESULTS_LIMIT)
         .execute({ autoFetch: true })
         .then(res =>
           res.map(i => {
@@ -136,7 +136,7 @@ async function Projects(req, res) {
           ProjectFields.legacyInterestedIn,
         ])
         .where(legacyFilters)
-        .limit(API_RESULTS_LIMIT)
+        // .limit(API_RESULTS_LIMIT)
         .execute({ autoFetch: true })
         .then(res =>
           res.map(i => {
