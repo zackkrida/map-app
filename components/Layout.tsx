@@ -124,37 +124,42 @@ export function Layout({ children }: LayoutProps) {
     setResultsLoading(true)
 
     try {
-      let projects: ProjectResultList = await postFetcher(`/api/project`, {
+      const filters = {
         q: nq,
         type: ntype,
         ...nfilters,
-      })
+      }
+      let projects: ProjectResultList = await Promise.all([
+        postFetcher(`/api/project`, filters),
+        postFetcher(`/api/legacy`, filters),
+      ]).then(results => results.flat())
 
       if (searchMode === SearchModes.Proximity) {
         if (mapsRef.current) {
           let geocoder = new window.google.maps.Geocoder()
-          geocoder.geocode({ address: proximityQuery }, function (
-            results,
-            status
-          ) {
-            if (status !== google.maps.GeocoderStatus.OK) {
-              console.error(
-                'Geocode was not successful for the following reason: ' + status
+          geocoder.geocode(
+            { address: proximityQuery },
+            function (results, status) {
+              if (status !== google.maps.GeocoderStatus.OK) {
+                console.error(
+                  'Geocode was not successful for the following reason: ' +
+                    status
+                )
+                return
+              }
+
+              let referenceLatLng = {
+                lat: results[0].geometry.location.lat(),
+                lng: results[0].geometry.location.lng(),
+              }
+
+              let projs = withinXMilesOf(referenceLatLng)(proximityMiles)(
+                projects
               )
-              return
+
+              setProjects(projs)
             }
-
-            let referenceLatLng = {
-              lat: results[0].geometry.location.lat(),
-              lng: results[0].geometry.location.lng(),
-            }
-
-            let projs = withinXMilesOf(referenceLatLng)(proximityMiles)(
-              projects
-            )
-
-            setProjects(projs)
-          })
+          )
         }
 
         setProjects([])
